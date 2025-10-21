@@ -1,68 +1,71 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import './index.css';
-import { SearchInput } from './components/SearchInput';
-import { ChatHistory } from './components/ChatHistory';
+﻿import React, { useState } from "react";
 
-export interface Message {
-  sender: 'user' | 'ai';
-  text: string;
-  sources?: { source: string, page: number | string }[];
-}
+export default function App() {
+  const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
 
-const BACKEND_URL = 'https://globalregai-backend-wcsg33p67a-an.a.run.app/query';
-function App() {
-  const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSendMessage = async (userInput: string) => {
-    if (!userInput.trim()) return;
-    const userMessage: Message = { sender: 'user', text: userInput };
-    setChatHistory(prev => [...prev, userMessage]);
-    setIsLoading(true);
-
-    if (!BACKEND_URL) {
-      const errorMessage: Message = { sender: 'ai', text: '오류: 백엔드 서버 주소가 설정되지 않았습니다. Vercel 환경 변수를 확인해주세요.' };
-      setChatHistory(prev => [...prev, errorMessage]);
-      setIsLoading(false);
-      return;
-    }
+  async function ask() {
+    const question = q.trim();
+    if (!question) return;
+    setLoading(true);
+    setMessages((m) => [...m, { role: "user", text: question }]);
+    setQ("");
 
     try {
-      const response = await axios.post(BACKEND_URL, {
-        question: userInput
+      const resp = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
       });
-      const aiMessage: Message = {
-        sender: 'ai',
-        text: response.data.answer,
-        sources: response.data.sources
-      };
-      setChatHistory(prev => [...prev, aiMessage]);
-
-    } catch (error) {
-      let errorMessageText = '답변을 생성하는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-      if (axios.isAxiosError(error) && error.response) {
-        errorMessageText = `서버 오류: ${error.response.data.error || error.message}`;
-      } else if (axios.isAxiosError(error)) {
-        errorMessageText = `네트워크 오류: ${error.message}. 백엔드 서버가 정상적으로 실행 중인지 확인해주세요.`;
-      }
-      const errorMessageObj: Message = { sender: 'ai', text: errorMessageText };
-      setChatHistory(prev => [...prev, errorMessageObj]);
+      const data = await resp.json();
+      const answer = data?.answer ?? data?.error ?? "응답 없음";
+      setMessages((m) => [...m, { role: "assistant", text: answer }]);
+    } catch (e: any) {
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", text: `네트워크 오류: ${e?.message || e}` },
+      ]);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1>GlobalRegAI 🚀</h1>
-        <p>AI 기반 글로벌 규제 의사결정 시스템</p>
-      </header>
-      <ChatHistory chatHistory={chatHistory} isLoading={isLoading} />
-      <SearchInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+    <div style={{ maxWidth: 760, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
+      <h1>GlobalRegAI 🚀</h1>
+      <p>AI 기반 규제·법령 Q&A. 모르면 한계를 밝히고, 확실한 건 간결하게 요약합니다.</p>
+
+      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && ask()}
+          placeholder="예: 미국 FDA 의료기기 510(k) 제출 요건 핵심을 요약해줘"
+          style={{ flex: 1, padding: 10, fontSize: 16 }}
+        />
+        <button disabled={loading} onClick={ask} style={{ padding: "10px 16px", fontSize: 16 }}>
+          {loading ? "조회중…" : "질문"}
+        </button>
+      </div>
+
+      <div style={{ marginTop: 20, display: "grid", gap: 10 }}>
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            style={{
+              whiteSpace: "pre-wrap",
+              background: m.role === "user" ? "#f3f4f6" : "#eef6ff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 8,
+              padding: 12,
+            }}
+          >
+            <b>{m.role === "user" ? "질문" : "답변"}</b>
+            <div style={{ marginTop: 6 }}>{m.text}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
-
-export default App;
