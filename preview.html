@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GlobalRegAI - PREVIEW</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* NOTE: This is a static preview. The CSS is embedded for portability. */
+    :root {
+      --primary-color: #4A90E2; --secondary-color: #50E3C2; --background-color: #F4F7FC;
+      --panel-background: #FFFFFF; --text-color: #333333; --header-text-color: #FFFFFF;
+      --border-color: #DAE1E9; --success-color: #34C759; --error-color: #FF3B30;
+      --font-family-main: 'Inter', 'Noto Sans KR', sans-serif; --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --border-radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-family-main); background-color: var(--background-color); color: var(--text-color); line-height: 1.6; }
+    #app-container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+    .app-header { background: linear-gradient(90deg, var(--primary-color), #3A7BD5); color: var(--header-text-color); padding: 1rem 2rem; border-radius: var(--border-radius); display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; box-shadow: var(--box-shadow); }
+    .app-header .logo { display: flex; align-items: center; gap: 0.75rem; }
+    .app-header .logo .material-icons { font-size: 2.5rem; }
+    .app-header .logo h1 { font-size: 1.8rem; font-weight: 600; }
+    .app-header .header-right { display: flex; align-items: center; gap: 2rem; }
+    .app-header .user-info, .app-header .language-selector { display: flex; align-items: center; gap: 0.5rem; }
+    .app-header .language-selector select { background-color: rgba(255, 255, 255, 0.2); color: var(--header-text-color); border: none; border-radius: 6px; padding: 0.3rem 0.5rem; }
+    .app-header .language-selector select option { background-color: var(--primary-color); }
+    .main-content { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; grid-template-areas: "input result" "history history"; }
+    .input-panel, .result-panel, .history-panel { background-color: var(--panel-background); border-radius: var(--border-radius); padding: 2rem; box-shadow: var(--box-shadow); }
+    h2 { display: flex; align-items: center; gap: 0.5rem; font-size: 1.4rem; margin-bottom: 1.5rem; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 0.75rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+    .form-group input[type="text"], .form-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; }
+    .radio-group, .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; background-color: var(--background-color); padding: 0.75rem; border-radius: 8px; }
+    .radio-group label, .checkbox-group label { margin-bottom: 0; cursor: pointer; display: flex; align-items: center; }
+    .form-action { margin-top: 2rem; text-align: center; }
+    #generate-btn { background: var(--primary-color); color: white; border: none; border-radius: 8px; padding: 0.9rem 1.5rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .result-section { background-color: var(--background-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .result-section h3 { font-size: 1.2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+    .result-section p { font-size: 1rem; margin-bottom: 0.5rem; }
+    .result-section strong { color: var(--primary-color); }
+    .timeline .phase h4 { font-weight: 600; margin-bottom: 0.5rem; }
+    .timeline .phase ul { list-style-type: none; padding-left: 1.5rem; border-left: 2px solid var(--primary-color); }
+    .timeline .phase li { position: relative; padding: 0.25rem 0 0.25rem 1rem; }
+    .timeline .phase li::before { content: '✓'; position: absolute; left: -20px; top: 5px; background: var(--primary-color); color: white; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; }
+    .deadlines li { background-color: #fff3cd; padding: 0.5rem 1rem; border-radius: 6px; margin-bottom: 0.5rem; border-left: 4px solid #ffc107; }
+    .table-container { width: 100%; overflow-x: auto; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+    th { background-color: var(--background-color); font-weight: 600; }
+    td .status { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+    .status.in-progress { background-color: #fff3cd; color: #856404; }
+    .status.completed { background-color: #d4edda; color: #155724; }
+    .status.pending { background-color: #e2e3e5; color: #383d41; }
+    @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; grid-template-areas: "input" "result" "history"; } }
+  </style>
+</head>
+<body>
+  <div id="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <span class="material-icons">public</span><h1>GlobalRegAI</h1>
+      </div>
+      <div class="header-right">
+        <div class="user-info"><span class="material-icons">account_circle</span><span>user@example.com</span></div>
+        <div class="language-selector"><span class="material-icons">translate</span><select><option>KR</option><option>EN</option></select></div>
+      </div>
+    </header>
+    <main class="main-content">
+      <div class="input-panel">
+        <h2><span class="material-icons">edit_document</span> 1. Generate New Project</h2>
+        <form>
+          <div class="form-grid">
+            <div class="form-group full-width"><label for="country">Country Selection</label><input type="text" value="Korea"></div>
+            <div class="form-group"><label>Product Type</label><div class="radio-group"><input type="radio" checked> <label>Medical Device</label> <input type="radio"><label>Pharmaceutical</label></div></div>
+            <div class="form-group"><label>Regulatory Class</label><select><option>Class II</option></select></div>
+            <div class="form-group"><label>Budget Scale</label><select><option>1-5억원</option></select></div>
+            <div class="form-group full-width"><label>Advanced Options</label><div class="checkbox-group"><input type="checkbox" checked><label>GMP/MDSAP Audit</label><input type="checkbox"><label>UDI/GUDID Registration</label></div></div>
+          </div>
+          <div class="form-action"><button type="button" id="generate-btn"><span class="material-icons">auto_awesome</span> Generate AI Project Plan</button></div>
+        </form>
+      </div>
+      <div class="result-panel">
+        <h2><span class="material-icons">bubble_chart</span> 2. AI Recommendation</h2>
+        <div id="result-content">
+            <div class="result-section">
+              <h3>📊 AI Recommended Regulatory Path</h3>
+              <p><strong>Optimal Path:</strong> Korea MFDS Class II → EU MDR Class IIa → US FDA 510(k)</p>
+              <p><strong>Est. Duration:</strong> 18-24 months</p><p><strong>Est. Cost:</strong> 2-3억원</p>
+            </div>
+            <div class="result-section timeline">
+              <h3>📋 Step-by-Step Schedule</h3>
+              <div class="phase"><h4>Phase 1: Preparation (0-3 months)</h4><ul><li>2025-11-01: Gap analysis and document review</li><li>2025-11-15: GMP/ISO 13485 audit prep</li></ul></div>
+              <div class="phase"><h4>Phase 2: Submission (3-9 months)</h4><ul><li>2026-01-15: MFDS technical file submission</li><li>2026-03-15: CE technical file preparation</li></ul></div>
+            </div>
+             <div class="result-section deadlines"><h3>⚠️ Key Deadlines</h3><ul><li><strong>2026-02-02:</strong> QMSR transition deadline</li></ul></div>
+        </div>
+      </div>
+      <div class="history-panel" style="grid-area: history;">
+        <h2><span class="material-icons">history</span> 3. Project History</h2>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>ID</th><th>Timestamp</th><th>Country</th><th>Product</th><th>Class</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>GR1234</td><td>2025-10-21</td><td>Korea</td><td>Medical Device</td><td>II</td><td><span class="status in-progress">진행중</span></td></tr>
+              <tr><td>GR1233</td><td>2025-10-20</td><td>USA</td><td>Pharmaceutical</td><td>510(k)</td><td><span class="status completed">완료</span></td></tr>
+              <tr><td>GR1232</td><td>2025-10-19</td><td>EU</td><td>Medical Device</td><td>IIa</td><td><span class="status pending">시작전</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
