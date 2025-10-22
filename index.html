@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>GlobalRegAI - Global Regulatory AI Platform</title>
+  <!-- Google Fonts for professional typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Material Icons for UI elements -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <?!= include('stylesheet'); ?>
+
+</head>
+<body>
+  <div id="app-container">
+    <!-- =================================== -->
+    <!-- ========= HEADER SECTION ========== -->
+    <!-- =================================== -->
+    <header class="app-header">
+      <div class="logo">
+        <span class="material-icons">public</span>
+        <h1>GlobalRegAI</h1>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <span class="material-icons">account_circle</span>
+          <span id="user-email"><?= Session.getActiveUser().getEmail() ?></span>
+        </div>
+        <div class="language-selector">
+          <span class="material-icons">translate</span>
+          <select id="language">
+            <option value="en">EN</option>
+            <option value="kr" selected>KR</option>
+            <option value="jp">JP</option>
+            <option value="es">ES</option>
+            <option value="de">DE</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="input-panel">
+        <!-- =================================== -->
+        <!-- ========= INPUT SECTION =========== -->
+        <!-- =================================== -->
+        <h2><span class="material-icons">edit_document</span> 1. Generate New Project</h2>
+        <form id="project-form">
+
+          <div class="form-grid">
+            <!-- Country Selection -->
+            <div class="form-group full-width">
+              <label for="country">Country Selection</label>
+              <input type="text" id="country" name="country" placeholder="e.g., Korea, USA, EU MDR, Brazil" required>
+            </div>
+
+            <!-- Product Type -->
+            <div class="form-group">
+              <label>Product Type</label>
+              <div class="radio-group">
+                <input type="radio" id="medical-device" name="productType" value="Medical Device" checked><label for="medical-device">Medical Device</label>
+                <input type="radio" id="pharma" name="productType" value="Pharmaceutical"><label for="pharma">Pharmaceutical</label>
+                <input type="radio" id="cosmetics" name="productType" value="Cosmetics"><label for="cosmetics">Cosmetics</label>
+                <input type="radio" id="vet" name="productType" value="Veterinary"><label for="vet">Veterinary</label>
+              </div>
+            </div>
+
+            <!-- Regulatory Class -->
+            <div class="form-group">
+              <label for="regulatory-class">Regulatory Class</label>
+              <select id="regulatory-class" name="regulatoryClass" required>
+                <option value="">Select Country First</option>
+              </select>
+            </div>
+
+            <!-- Budget Scale -->
+            <div class="form-group">
+              <label for="budget">Budget Scale</label>
+              <select id="budget" name="budget" required>
+                <option value="< 100M KRW">&lt; 1억원</option>
+                <option value="100-500M KRW">1-5억원</option>
+                <option value="> 500M KRW">&gt; 5억원</option>
+              </select>
+            </div>
+
+            <!-- Advanced Options -->
+            <div class="form-group">
+              <label>Advanced Options</label>
+              <div class="checkbox-group">
+                <input type="checkbox" id="gmp-mdsap" name="advancedOptions" value="GMP/MDSAP Audit"><label for="gmp-mdsap">GMP/MDSAP Audit</label>
+                <input type="checkbox" id="udi-gudid" name="advancedOptions" value="UDI/GUDID Registration"><label for="udi-gudid">UDI/GUDID Registration</label>
+                <input type="checkbox" id="procurement" name="advancedOptions" value="Government Procurement"><label for="procurement">Government Procurement</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <div class="form-action">
+            <button type="submit" id="generate-btn">
+              <span class="material-icons">auto_awesome</span> Generate AI Project Plan
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- =================================== -->
+      <!-- ====== AI RESULT SECTION ========== -->
+      <!-- =================================== -->
+      <div class="result-panel" id="result-panel">
+          <h2><span class="material-icons">bubble_chart</span> 2. AI Recommendation</h2>
+          <div id="loader" class="loader" style="display: none;"></div>
+          <div id="placeholder" class="placeholder">
+              <span class="material-icons">auto_fix_high</span>
+              <p>Your AI-generated project plan will appear here.</p>
+          </div>
+          <div id="result-content" style="display: none;">
+              <!-- AI content will be dynamically inserted here -->
+          </div>
+      </div>
+
+      <!-- =================================== -->
+      <!-- ======= HISTORY SECTION =========== -->
+      <!-- =================================== -->
+      <div class="history-panel">
+        <div class="history-header">
+          <h2><span class="material-icons">history</span> 3. Project History</h2>
+          <button id="refresh-history-btn">
+            <span class="material-icons">refresh</span> Refresh
+          </button>
+        </div>
+        <div class="history-controls">
+          <input type="text" id="history-search" placeholder="Search...">
+          <!-- Add filters if needed -->
+        </div>
+        <div class="table-container">
+          <table id="history-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Country</th>
+                <th>Product</th>
+                <th>Class</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!-- History rows will be dynamically inserted here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <?!= include('javascript'); ?>
+
+</body>
+</html>

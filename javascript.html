@@ -1,0 +1,275 @@
+<script>
+// =================================== //
+// ======== GLOBAL VARIABLES ========= //
+// =================================== //
+const form = document.getElementById('project-form');
+const generateBtn = document.getElementById('generate-btn');
+const resultPanel = document.getElementById('result-panel');
+const resultContent = document.getElementById('result-content');
+const loader = document.getElementById('loader');
+const placeholder = document.getElementById('placeholder');
+const countryInput = document.getElementById('country');
+const regulatoryClassSelect = document.getElementById('regulatory-class');
+const historyTableBody = document.getElementById('history-table-body');
+const refreshHistoryBtn = document.getElementById('refresh-history-btn');
+
+// Mapping of countries to their regulatory classes
+const regulatoryClasses = {
+    'korea': ['Class I', 'Class II', 'Class III', 'Class IV'],
+    'usa': ['510(k)', 'De Novo', 'PMA', 'Exempt'],
+    'eu': ['Class I', 'Class IIa', 'Class IIb', 'Class III'],
+    'mdr': ['Class I', 'Class IIa', 'Class IIb', 'Class III'], // Alias for EU
+    'brazil': ['Class I', 'Class II', 'Class III', 'Class IV'],
+    'anvisa': ['Class I', 'Class II', 'Class III', 'Class IV'], // Alias for Brazil
+    'uk': ['Class I', 'Class IIa', 'Class IIb', 'Class III'],
+    'mhra': ['Class I', 'Class IIa', 'Class IIb', 'Class III'] // Alias for UK
+};
+
+
+// =================================== //
+// ========= EVENT LISTENERS ========= //
+// =================================== //
+
+/**
+ * Executes when the DOM is fully loaded.
+ * Fetches the initial project history.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  loadHistory();
+});
+
+/**
+ * Handles the form submission to generate a new project plan.
+ */
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  disableForm(true);
+
+  // Show loader and hide previous results
+  loader.style.display = 'flex';
+  placeholder.style.display = 'none';
+  resultContent.style.display = 'none';
+  resultContent.innerHTML = '';
+
+  // Collect form data
+  const formData = {
+    country: form.elements.country.value,
+    productType: form.elements.productType.value,
+    regulatoryClass: form.elements.regulatoryClass.value,
+    budget: form.elements.budget.value,
+    advancedOptions: Array.from(form.elements.advancedOptions)
+                          .filter(cb => cb.checked)
+                          .map(cb => cb.value)
+  };
+
+  // Call server-side function
+  google.script.run
+    .withSuccessHandler(onPlanSuccess)
+    .withFailureHandler(onPlanFailure)
+    .generateProjectPlan(formData);
+});
+
+/**
+ * Updates the regulatory class dropdown when the country input changes.
+ */
+countryInput.addEventListener('input', (event) => {
+  const country = event.target.value.toLowerCase();
+  updateRegulatoryClasses(country);
+});
+
+/**
+ * Refreshes the project history table when the refresh button is clicked.
+ */
+refreshHistoryBtn.addEventListener('click', () => {
+    historyTableBody.innerHTML = '<tr><td colspan="7">Loading history...</td></tr>';
+    loadHistory();
+});
+
+
+// =================================== //
+// ======== UI UPDATE FUNCTIONS ====== //
+// =================================== //
+
+/**
+ * Handles the successful response from the AI plan generation.
+ * @param {object} response - The response object from the server.
+ */
+function onPlanSuccess(response) {
+  loader.style.display = 'none';
+  if (response.success) {
+    resultContent.innerHTML = formatAIResponse(response.data);
+    resultContent.style.display = 'block';
+    loadHistory(); // Refresh history after adding a new entry
+  } else {
+    onPlanFailure({ message: response.message });
+  }
+  disableForm(false);
+}
+
+/**
+ * Handles any errors during the AI plan generation.
+ * @param {Error} error - The error object.
+ */
+function onPlanFailure(error) {
+  loader.style.display = 'none';
+  resultContent.innerHTML = `<div class="error-message"><strong>Error:</strong> ${error.message}</div>`;
+  resultContent.style.display = 'block';
+  disableForm(false);
+}
+
+/**
+ * Disables or enables the form during AI processing.
+ * @param {boolean} isDisabled - True to disable, false to enable.
+ */
+function disableForm(isDisabled) {
+  generateBtn.disabled = isDisabled;
+  Array.from(form.elements).forEach(el => el.disabled = isDisabled);
+}
+
+/**
+ * Populates the regulatory class dropdown based on the country.
+ * @param {string} country - The country name entered by the user.
+ */
+function updateRegulatoryClasses(country) {
+  regulatoryClassSelect.innerHTML = ''; // Clear existing options
+
+  let options = [];
+  // Find a matching key in our predefined classes
+  for (const key in regulatoryClasses) {
+      if (country.includes(key)) {
+          options = regulatoryClasses[key];
+          break;
+      }
+  }
+
+  if (options.length > 0) {
+    options.forEach(cls => {
+      const option = new Option(cls, cls);
+      regulatoryClassSelect.add(option);
+    });
+  } else {
+    const option = new Option('Enter a valid country to see classes', '');
+    regulatoryClassSelect.add(option);
+  }
+}
+
+/**
+ * Formats the JSON response from the AI into readable HTML.
+ * @param {object} data - The AI response data.
+ * @return {string} HTML string to be inserted into the result panel.
+ */
+function formatAIResponse(data) {
+  // Main path and summary
+  const summaryHtml = `
+    <div class="result-section">
+      <h3>📊 AI Recommended Regulatory Path</h3>
+      <p><strong>Optimal Path:</strong> ${data.recommendedPath || 'N/A'}</p>
+      <p><strong>Est. Duration:</strong> ${data.estimatedDuration || 'N/A'}</p>
+      <p><strong>Est. Cost:</strong> ${data.estimatedCost || 'N/A'}</p>
+    </div>
+  `;
+
+  // Detailed schedule
+  let scheduleHtml = '';
+  if (data.detailedSchedule && data.detailedSchedule.length > 0) {
+    scheduleHtml = '<div class="result-section timeline"><h3>📋 Step-by-Step Schedule</h3>';
+    data.detailedSchedule.forEach(phase => {
+      scheduleHtml += `
+        <div class="phase">
+          <h4>${phase.phaseName}</h4>
+          <ul>
+            ${phase.tasks.map(task => `<li>${task}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    });
+    scheduleHtml += '</div>';
+  }
+
+  // Key deadlines
+  let deadlinesHtml = '';
+  if (data.keyDeadlines && data.keyDeadlines.length > 0) {
+    deadlinesHtml = '<div class="result-section deadlines"><h3>⚠️ Key Deadlines</h3><ul>';
+    data.keyDeadlines.forEach(deadline => {
+      deadlinesHtml += `<li><strong>${deadline.date}:</strong> ${deadline.description}</li>`;
+    });
+    deadlinesHtml += '</ul></div>';
+  }
+
+  return summaryHtml + scheduleHtml + deadlinesHtml;
+}
+
+
+// =================================== //
+// ====== HISTORY DATA HANDLING ====== //
+// =================================== //
+
+/**
+ * Fetches project history from the server.
+ */
+function loadHistory() {
+  google.script.run
+    .withSuccessHandler(onHistoryLoadSuccess)
+    .withFailureHandler(onHistoryLoadFailure)
+    .getProjectHistory();
+}
+
+/**
+ * Populates the history table on successful data fetch.
+ * @param {Array<Array<string>>} data - 2D array of history data from the sheet.
+ */
+function onHistoryLoadSuccess(data) {
+    if (data && data.length > 0) {
+        let tableRows = '';
+        data.forEach(row => {
+            // Assuming the sheet columns are: ID, Timestamp, User, Country, Product, Class, Status
+            const [id, timestamp, user, country, product, regClass, budget, aiPath, schedule, status] = row;
+
+            const formattedDate = new Date(timestamp).toLocaleDateString("ko-KR");
+
+            tableRows += `
+                <tr>
+                    <td>${id}</td>
+                    <td>${formattedDate}</td>
+                    <td>${country}</td>
+                    <td>${product}</td>
+                    <td>${regClass}</td>
+                    <td><span class="status ${getStatusClass(status)}">${status}</span></td>
+                    <td><button class="action-btn">View</button></td>
+                </tr>
+            `;
+        });
+        historyTableBody.innerHTML = tableRows;
+    } else {
+        historyTableBody.innerHTML = '<tr><td colspan="7">No project history found.</td></tr>';
+    }
+}
+
+/**
+ * Handles errors during history data fetching.
+ */
+function onHistoryLoadFailure() {
+    historyTableBody.innerHTML = '<tr><td colspan="7">Failed to load project history.</td></tr>';
+}
+
+/**
+ * Returns a CSS class based on the project status string.
+ * @param {string} status - The project status.
+ * @return {string} The corresponding CSS class.
+ */
+function getStatusClass(status) {
+    switch (status.toLowerCase()) {
+        case '진행중':
+        case 'in progress':
+            return 'in-progress';
+        case '완료':
+        case 'completed':
+            return 'completed';
+        case '시작전':
+        case 'pending':
+        default:
+            return 'pending';
+    }
+}
+
+</script>
