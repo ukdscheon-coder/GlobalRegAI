@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlobalAIReg — 허가 등록 워크플로우</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D2137;--navy2:#1A3A5C;--navy3:#1F4E79;
+  --teal:#0EA5A0;--teal2:#14B8B2;
+  --gold:#C9A84C;--red:#E74C3C;--green:#27AE60;
+  --white:#F4F7FA;--white2:#E8EDF3;
+  --gray:#8FA3B8;--gray2:#5C7A95;
+  --surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.16);
+  --font-disp:'Bebas Neue',sans-serif;
+  --font-body:'Noto Sans KR',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--white);font-family:var(--font-body);line-height:1.7;overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--navy3);border-radius:4px}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(13,33,55,.96);backdrop-filter:blur(16px);border-bottom:0.5px solid var(--border)}
+.nav-logo{font-family:var(--font-disp);font-size:20px;letter-spacing:1px;text-decoration:none;color:var(--white)}
+.nav-logo em{color:var(--teal);font-style:normal}
+.nav-back{font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--teal)}
+.nav-title{font-size:13px;font-weight:500;color:var(--white2)}
+
+/* HERO STRIP */
+.hero-strip{padding:32px 32px 28px;border-bottom:0.5px solid var(--border);background:linear-gradient(90deg,rgba(14,165,160,.06) 0%,transparent 60%)}
+.hero-strip h1{font-family:var(--font-disp);font-size:clamp(28px,4vw,48px);letter-spacing:.5px;line-height:1;margin-bottom:8px}
+.hero-strip h1 em{color:var(--teal);font-style:normal}
+.hero-strip p{font-size:13px;color:var(--gray);max-width:600px}
+
+/* SELECTOR */
+.selector-wrap{padding:24px 32px;border-bottom:0.5px solid var(--border);background:var(--surface);display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end}
+.sel-group{display:flex;flex-direction:column;gap:8px}
+.sel-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-weight:500}
+.sel-btns{display:flex;gap:6px;flex-wrap:wrap}
+.sel-btn{font-family:var(--font-body);font-size:12px;font-weight:500;padding:7px 16px;border:0.5px solid var(--border2);border-radius:6px;background:transparent;color:var(--gray);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.sel-btn:hover{color:var(--white);border-color:var(--teal)}
+.sel-btn.active{background:var(--teal);color:var(--navy);border-color:var(--teal)}
+.sel-divider{width:0.5px;height:40px;background:var(--border2);align-self:flex-end;margin-bottom:2px}
+
+/* PROGRESS BAR */
+.progress-wrap{padding:16px 32px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:16px;background:rgba(14,165,160,.04)}
+.progress-label{font-size:11px;color:var(--gray);white-space:nowrap;min-width:80px}
+.progress-bar{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--teal);border-radius:3px;transition:width .4s ease;width:0%}
+.progress-pct{font-family:var(--font-mono);font-size:12px;color:var(--teal);min-width:36px;text-align:right}
+.progress-stats{font-size:11px;color:var(--gray2)}
+
+/* MAIN LAYOUT */
+.main-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 200px)}
+
+/* SIDEBAR */
+.sidebar{border-right:0.5px solid var(--border);padding:20px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;background:rgba(13,33,55,.4)}
+.sidebar::-webkit-scrollbar{width:2px}
+.phase-group{margin-bottom:4px}
+.phase-header{padding:8px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s}
+.phase-header:hover{background:var(--surface)}
+.phase-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--gray2);flex-shrink:0;transition:all .2s}
+.phase-dot.done{background:var(--teal);border-color:var(--teal)}
+.phase-dot.active{background:transparent;border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,160,.2)}
+.phase-name{font-size:12px;color:var(--gray);transition:color .2s;line-height:1.4}
+.phase-header.active .phase-name{color:var(--teal);font-weight:500}
+.phase-header.done .phase-name{color:var(--gray2)}
+.phase-count{margin-left:auto;font-size:10px;font-family:var(--font-mono);color:var(--gray2)}
+.phase-steps{padding:4px 0 4px 28px;border-left:1px solid var(--border);margin-left:23px}
+.side-step{padding:5px 16px 5px 12px;font-size:11px;color:var(--gray2);cursor:pointer;transition:all .15s;border-left:2px solid transparent;display:flex;align-items:center;gap:6px}
+.side-step:hover{color:var(--white);border-left-color:var(--border2)}
+.side-step.active{color:var(--teal);border-left-color:var(--teal)}
+.side-step.done{color:var(--gray2)}
+.side-step.done::before{content:'✓';font-size:9px;color:var(--teal);flex-shrink:0}
+
+/* CONTENT */
+.content{padding:0;overflow-y:auto}
+.phase-section{padding:32px 36px;border-bottom:0.5px solid var(--border)}
+.phase-title-row{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.phase-badge{font-family:var(--font-disp);font-size:13px;letter-spacing:1px;padding:4px 12px;border-radius:4px;background:rgba(14,165,160,.15);border:0.5px solid rgba(14,165,160,.3);color:var(--teal)}
+.phase-title{font-family:var(--font-disp);font-size:26px;letter-spacing:.5px}
+.phase-desc{font-size:13px;color:var(--gray);margin-top:4px;max-width:600px;line-height:1.7}
+
+/* STEP CARD */
+.steps-list{display:flex;flex-direction:column;gap:12px}
+.step-card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;transition:all .2s}
+.step-card.done-card{border-color:rgba(14,165,160,.2);background:rgba(14,165,160,.03)}
+.step-card.done-card .step-main{opacity:.65}
+.step-card:hover{border-color:var(--border2)}
+.step-main{padding:16px 18px;display:flex;align-items:flex-start;gap:14px;cursor:pointer}
+.step-check{width:22px;height:22px;border:1.5px solid var(--border2);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;margin-top:1px}
+.step-check:hover{border-color:var(--teal)}
+.step-check.checked{background:var(--teal);border-color:var(--teal)}
+.step-check.checked::after{content:'✓';font-size:10px;color:var(--navy);font-weight:700}
+.step-num{font-family:var(--font-mono);font-size:10px;color:var(--gray2);flex-shrink:0;margin-top:3px;min-width:28px}
+.step-body{flex:1}
+.step-title{font-size:14px;font-weight:500;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.step-desc{font-size:12.5px;color:var(--gray);line-height:1.75}
+.step-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.meta-tag{font-size:10px;padding:3px 9px;border-radius:4px;font-family:var(--font-mono);display:flex;align-items:center;gap:4px}
+.tag-agency{background:rgba(14,165,160,.1);border:0.5px solid rgba(14,165,160,.2);color:var(--teal)}
+.tag-time{background:rgba(201,168,76,.1);border:0.5px solid rgba(201,168,76,.2);color:var(--gold)}
+.tag-cost{background:rgba(52,152,219,.1);border:0.5px solid rgba(52,152,219,.2);color:#5dade2}
+.tag-doc{background:rgba(255,255,255,.05);border:0.5px solid var(--border2);color:var(--gray)}
+.tag-critical{background:rgba(231,76,60,.1);border:0.5px solid rgba(231,76,60,.2);color:var(--red)}
+.step-expand-btn{font-size:11px;color:var(--teal);background:none;border:none;cursor:pointer;padding:0 0 0 4px;font-family:var(--font-body);transition:opacity .15s}
+.step-expand-btn:hover{opacity:.7}
+.step-detail{padding:0 18px 16px 64px;display:none}
+.step-detail.open{display:block}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+.detail-box{background:rgba(255,255,255,.03);border:0.5px solid var(--border);border-radius:7px;padding:12px}
+.detail-box-title{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin-bottom:8px;font-weight:500}
+.detail-box ul{padding-left:14px}
+.detail-box li{font-size:12px;color:var(--white2);margin-bottom:4px;line-height:1.6}
+.detail-box p{font-size:12px;color:var(--white2);line-height:1.7}
+.ai-ask-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--teal);background:rgba(14,165,160,.08);border:0.5px solid rgba(14,165,160,.25);border-radius:5px;padding:6px 12px;cursor:pointer;font-family:var(--font-body);transition:all .15s;text-decoration:none}
+.ai-ask-btn:hover{background:rgba(14,165,160,.16)}
+
+/* IMPORTANCE BADGE */
+.imp-critical{font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(231,76,60,.15);color:var(--red);border:0.5px solid rgba(231,76,60,.25);font-weight:500}
+.imp-important{font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(201,168,76,.15);color:var(--gold);border:0.5px solid rgba(201,168,76,.25);font-weight:500}
+
+/* COMPLETION */
+.completion-banner{display:none;margin:20px 36px;padding:20px 24px;background:rgba(39,174,96,.08);border:0.5px solid rgba(39,174,96,.3);border-radius:10px}
+.completion-banner.show{display:flex;align-items:center;gap:16px}
+.comp-icon{font-size:32px;flex-shrink:0}
+.comp-title{font-size:16px;font-weight:500;color:#52be80;margin-bottom:4px}
+.comp-desc{font-size:12px;color:var(--gray);line-height:1.6}
+
+/* EMPTY STATE */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;text-align:center;color:var(--gray)}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+.empty-title{font-size:18px;font-weight:500;margin-bottom:8px;color:var(--white2)}
+.empty-desc{font-size:13px;line-height:1.7;max-width:360px}
+
+/* AI CHAT PANEL */
+.ai-panel{position:fixed;right:0;top:56px;bottom:0;width:380px;background:rgba(13,33,55,.97);border-left:0.5px solid var(--border2);transform:translateX(100%);transition:transform .3s ease;z-index:200;display:flex;flex-direction:column;backdrop-filter:blur(20px)}
+.ai-panel.open{transform:none}
+.ai-panel-header{padding:14px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ai-panel-title{font-size:13px;font-weight:500;flex:1}
+.ai-close{background:none;border:none;color:var(--gray);font-size:18px;cursor:pointer;line-height:1;transition:color .15s}
+.ai-close:hover{color:var(--white)}
+.ai-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.ai-msgs::-webkit-scrollbar{width:2px}
+.ai-msg{display:flex;gap:8px;animation:fadeUp .2s ease}
+.ai-msg.user{flex-direction:row-reverse}
+.ai-av{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.ai-msg.ai .ai-av{background:var(--teal);color:var(--navy);font-family:var(--font-disp);font-size:11px}
+.ai-msg.user .ai-av{background:var(--surface2);color:var(--gray);border:0.5px solid var(--border2)}
+.ai-bub{max-width:88%;font-size:12px;line-height:1.7}
+.ai-msg.user .ai-bub{background:var(--navy3);padding:8px 11px;border-radius:10px 3px 10px 10px;color:var(--white);border:0.5px solid rgba(14,165,160,.2)}
+.ai-msg.ai .ai-bub{color:var(--white2)}
+.ai-sec-card{border:0.5px solid var(--border);border-radius:6px;margin-bottom:4px;background:var(--surface);overflow:hidden}
+.ai-sec-head{display:flex;align-items:center;gap:6px;padding:5px 8px;border-bottom:0.5px solid var(--border);background:rgba(255,255,255,.02)}
+.ai-sec-ic{width:14px;height:14px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0}
+.ai1{background:rgba(14,165,160,.2);color:var(--teal)}
+.ai2{background:rgba(201,168,76,.2);color:var(--gold)}
+.ai3{background:rgba(231,76,60,.2);color:var(--red)}
+.ai-sec-ht{font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:.4px}
+.ai-sec-body{padding:7px 9px;font-size:11.5px;color:var(--white2);line-height:1.7}
+.ai-src-list{padding:6px 8px;display:flex;flex-direction:column;gap:3px}
+.ai-src{display:flex;gap:6px;font-size:10px;color:var(--gray);padding:4px 6px;background:rgba(255,255,255,.03);border-radius:4px}
+.ai-src-b{font-size:8px;font-weight:700;padding:1px 5px;border-radius:8px;flex-shrink:0;margin-top:1px}
+.b-m{background:rgba(14,165,160,.2);color:var(--teal)}
+.b-f{background:rgba(231,76,60,.2);color:var(--red)}
+.b-e{background:rgba(52,152,219,.2);color:#5dade2}
+.b-w{background:rgba(201,168,76,.2);color:var(--gold)}
+.ai-disc{font-size:10px;color:var(--gray2);padding:5px 7px;border-left:1.5px solid var(--border2);margin-top:4px;line-height:1.5}
+.ai-typing{display:none;align-items:center;gap:6px;font-size:11px;color:var(--gray);padding:2px 0 2px 32px}
+.ai-typing.on{display:flex}
+.tdot{width:4px;height:4px;border-radius:50%;background:var(--teal);animation:bounce 1s infinite}
+.tdot:nth-child(2){animation-delay:.2s}.tdot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.7)}40%{transform:scale(1)}}
+.ai-input-area{padding:10px 12px;border-top:0.5px solid var(--border);display:flex;gap:6px;flex-shrink:0}
+.ai-inp{flex:1;font-family:var(--font-body);font-size:12px;padding:8px 10px;background:rgba(255,255,255,.05);border:0.5px solid var(--border2);border-radius:6px;color:var(--white);outline:none;resize:none;height:36px;line-height:1.5}
+.ai-inp:focus{border-color:var(--teal)}
+.ai-inp::placeholder{color:var(--gray2)}
+.ai-send{font-family:var(--font-body);font-size:11px;font-weight:500;padding:0 12px;height:36px;background:var(--teal);color:var(--navy);border:none;border-radius:6px;cursor:pointer;white-space:nowrap}
+.ai-send:disabled{opacity:.4;cursor:default}
+
+/* AI TOGGLE BTN */
+.ai-toggle{position:fixed;right:24px;bottom:28px;width:52px;height:52px;border-radius:50%;background:var(--teal);color:var(--navy);font-size:22px;border:none;cursor:pointer;z-index:199;box-shadow:0 4px 20px rgba(14,165,160,.4);transition:all .2s;display:flex;align-items:center;justify-content:center}
+.ai-toggle:hover{background:var(--teal2);transform:scale(1.05)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(max-width:900px){.main-layout{grid-template-columns:1fr}.sidebar{display:none}.ai-panel{width:100%}}
+@media(max-width:600px){.selector-wrap{padding:16px 18px}.phase-section{padding:24px 18px}.hero-strip{padding:24px 18px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Global<em>AI</em>Reg</a>
+  <span class="nav-title">허가 등록 워크플로우 A to Z</span>
+  <a href="index.html" class="nav-back">← 메인으로</a>
+</nav>
+
+<div class="hero-strip">
+  <h1>허가 등록 <em>A to Z</em></h1>
+  <p>분야와 국가를 선택하면 허가 신청 첫 단계부터 최종 승인까지 단계별 체크리스트를 제공합니다. 각 단계를 완료하면 체크 표시하여 진행 상황을 추적하세요.</p>
+</div>
+
+<div class="selector-wrap">
+  <div class="sel-group">
+    <div class="sel-label">분야 선택</div>
+    <div class="sel-btns" id="cat-btns">
+      <button class="sel-btn" data-cat="medical">🩺 의료기기</button>
+      <button class="sel-btn" data-cat="pharma">💊 의약품</button>
+      <button class="sel-btn" data-cat="cosmetic">🧴 화장품</button>
+      <button class="sel-btn" data-cat="food">🥗 식품</button>
+    </div>
+  </div>
+  <div class="sel-divider"></div>
+  <div class="sel-group">
+    <div class="sel-label">국가 선택</div>
+    <div class="sel-btns" id="country-btns">
+      <button class="sel-btn" data-country="kr">🇰🇷 한국</button>
+      <button class="sel-btn" data-country="us">🇺🇸 미국</button>
+      <button class="sel-btn" data-country="eu">🇪🇺 유럽</button>
+      <button class="sel-btn" data-country="jp">🇯🇵 일본</button>
+      <button class="sel-btn" data-country="cn">🇨🇳 중국</button>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap" id="progress-wrap" style="display:none">
+  <span class="progress-label">전체 진행률</span>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <span class="progress-pct" id="progress-pct">0%</span>
+  <span class="progress-stats" id="progress-stats"></span>
+</div>
+
+<div class="main-layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="content" id="content">
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">분야와 국가를 선택하세요</div>
+      <p class="empty-desc">위에서 등록할 제품 분야와 목표 국가를 선택하면 A to Z 워크플로우가 시작됩니다.</p>
+    </div>
+  </div>
+</div>
+
+<div class="completion-banner" id="completion-banner">
+  <div class="comp-icon">🎉</div>
+  <div>
+    <div class="comp-title">모든 단계 완료!</div>
+    <div class="comp-desc">모든 체크리스트 항목을 완료했습니다. 실제 허가 제출 전 규제 전문가 최종 검토를 권장합니다.</div>
+  </div>
+</div>
+
+<!-- AI PANEL -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-av" style="background:var(--teal);color:var(--navy);font-family:var(--font-disp);font-size:11px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">G</div>
+    <div class="ai-panel-title">GlobalAIReg — 규제 AI 상담</div>
+    <button class="ai-close" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-msgs" id="ai-msgs">
+    <div class="ai-msg ai">
+      <div class="ai-av">G</div>
+      <div class="ai-bub" style="color:var(--white2);font-size:12px;">각 단계의 <strong style="color:var(--white);">AI에게 질문하기</strong> 버튼을 누르거나 직접 질문하세요. 공식 규제 문서 기반으로 출처와 함께 답변합니다.</div>
+    </div>
+  </div>
+  <div class="ai-typing" id="ai-typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><span>분석 중…</span></div>
+  <div class="ai-input-area">
+    <textarea class="ai-inp" id="ai-inp" placeholder="이 단계에 대해 질문하세요…" rows="1"></textarea>
+    <button class="ai-send" id="ai-send" onclick="sendAI()">전송</button>
+  </div>
+</div>
+
+<button class="ai-toggle" onclick="toggleAI()" title="AI 상담">✦</button>
+
+<script>
+// ─────────────────────────────────────────────
+// WORKFLOW DATA
+// ─────────────────────────────────────────────
+const WF = {
+  medical:{
+    kr:{
+      title:'의료기기 한국(MFDS) 허가',
+      agency:'식품의약품안전처 (MFDS)',
+      total_time:'6개월~2년',
+      phases:[
+        {id:'pre',name:'A. 사전 기획 및 분류',steps:[
+          {id:'pre1',title:'제품 분류 확인',desc:'의료기기 해당 여부 및 등급(1~4등급) 결정. 식약처 의료기기 전자민원창구(UDIKOREA) 활용.',docs:['품목분류 기준서','제품 설명서'],agency:'MFDS 의료기기심사부',time:'1~2주',detail:{주요내용:['의료기기법 제2조 해당 여부 판단','1등급(위해도 낮음)~4등급(고위험) 분류','동등 품목 검색 (UDIKOREA)','품목명 및 품목코드 확인'],필요서류:['제품 카탈로그/설명서','작동 원리 설명서'],주의사항:['등급 오분류 시 허가 취소 위험','4등급은 임상시험 필수']},importance:'critical',ai_q:'의료기기 등급 분류 기준을 MFDS 관점에서 설명해줘. 1등급부터 4등급까지 예시 포함'},
+          {id:'pre2',title:'기존 허가 제품 비교 (동등성 검토)',desc:'동일·동등 품목 존재 여부 확인. 동등 품목 있으면 인증·신고로 단축 가능.',docs:['동등품목 비교표','선행 허가 제품 자료'],agency:'MFDS',time:'1~2주',detail:{주요내용:['식약처 의료기기 통합정보시스템 검색','기허가 품목과 구조·성능 비교','동등성 인정 요건 확인'],필요서류:['동등 제품 허가증 사본','비교 분석표'],주의사항:['동등성 불인정 시 신규 임상 필요']},ai_q:'의료기기 동등성 검토 기준과 MFDS 요구 비교 데이터를 설명해줘'},
+          {id:'pre3',title:'허가·인증·신고 경로 결정',desc:'3~4등급=허가, 2등급=인증, 1등급=신고. 경로별 요구 서류 상이.',docs:['경로별 체크리스트'],agency:'MFDS',time:'3일',detail:{주요내용:['1등급: 신고(즉시)','2등급: 인증(KTL·KFDA 지정기관)','3~4등급: 허가(MFDS 직접 심사)'],필요서류:['등급 분류 확인서'],주의사항:['경로 선택에 따라 비용·기간 2~10배 차이']},importance:'important',ai_q:'의료기기 허가·인증·신고 경로별 차이와 각 등급 요건을 상세히 설명해줘'},
+        ]},
+        {id:'doc',name:'B. 기술 문서 준비',steps:[
+          {id:'doc1',title:'기술 문서(TD) 작성',desc:'제품 설계, 제조, 시험 관련 모든 기술 자료 집성. 가장 방대한 작업.',docs:['제품 설명서','설계 도면','원자재 목록','제조 공정서'],agency:'자체 작성',time:'2~4개월',detail:{주요내용:['제품 개요 및 사용 목적','설계·개발 이력','제조 공정 상세','원자재 및 부품 목록','완제품 규격'],필요서류:['Design History File(DHF)','제조공정 흐름도','원자재 시험성적서'],주의사항:['ISO 13485 기준 문서 관리 체계 구축 선행 필요']},importance:'critical',ai_q:'의료기기 기술문서(TD) 작성 기준과 MFDS가 요구하는 핵심 항목을 설명해줘'},
+          {id:'doc2',title:'성능·안전성 시험',desc:'국내외 공인 시험기관에서 안전성·성능 시험 수행. 품목별 시험 기준 상이.',docs:['시험성적서','시험 계획서'],agency:'KTL·KFTC·KOLAS인증기관',time:'1~3개월',detail:{주요내용:['전기적 안전성 (IEC 60601 시리즈)','생체적합성 (ISO 10993)','전자기 적합성(EMC)','품목별 특수 성능 시험'],필요서류:['시험 의뢰서','시험 항목 목록','샘플 제품'],주의사항:['시험 항목 누락 시 보완 요청으로 3~6개월 지연']},importance:'critical',ai_q:'의료기기 안전성 시험 항목과 ISO 10993 생체적합성 평가 요건을 설명해줘'},
+          {id:'doc3',title:'임상 자료 준비',desc:'3~4등급은 임상시험 또는 문헌 자료 필요. 1~2등급은 임상 데이터 면제 가능.',docs:['임상시험계획서','임상 문헌 자료'],agency:'IRB·식약처 임상시험심사',time:'6개월~2년',detail:{주요내용:['임상시험 vs 문헌 검토 선택','IRB 심사 신청','GCP 준수 임상 수행','임상 데이터 분석 보고서'],필요서류:['임상시험계획서(CIP)','ICF(동의서)','임상시험 결과 보고서'],주의사항:['4등급은 거의 필수, 3등급은 면제 가능성 있음']},ai_q:'의료기기 임상시험 면제 조건과 MFDS 임상 자료 요건을 설명해줘'},
+          {id:'doc4',title:'GMP 적합성 심사 준비',desc:'제조소 GMP 인증 취득. 국내 제조사는 KGMP, 수입품은 외국 GMP 인정.',docs:['품질관리기준서','제조소 현황 자료'],agency:'MFDS GMP 평가팀',time:'3~6개월',detail:{주요내용:['ISO 13485 인증 취득','품질매뉴얼 작성','SOP(표준작업절차서) 정비','내부 감사 실시'],필요서류:['품질관리기준서','제조소 도면','제조 설비 목록','ISO 13485 인증서'],주의사항:['GMP 부적합 시 허가 불가. 최소 6개월 준비 권장']},importance:'critical',ai_q:'의료기기 KGMP와 ISO 13485의 관계 및 심사 기준을 설명해줘'},
+        ]},
+        {id:'submit',name:'C. 허가 신청 및 심사',steps:[
+          {id:'sub1',title:'허가 신청서 작성 및 제출',desc:'식약처 전자민원창구를 통해 온라인 제출. 서류 완성도가 심사 기간에 직결.',docs:['허가신청서','기술문서 전체','시험성적서 일체'],agency:'MFDS 전자민원창구',time:'2~4주',detail:{주요내용:['의료기기 허가신청서 양식 작성','기술 문서 첨부','수수료 납부 (등급별 상이)','접수 확인'],필요서류:['의료기기 허가·인증·신고 신청서','품목 기술서','GMP 적합인정서','시험성적서'],주의사항:['서류 누락 시 즉시 보완 요구 → 기간 연장']},importance:'critical',ai_q:'MFDS 의료기기 허가 신청 시 제출 서류 전체 목록과 전자민원 절차를 설명해줘'},
+          {id:'sub2',title:'서류 심사 (행정 검토)',desc:'접수 후 서류 완결성 검토. 보완 요구 시 60일 내 제출해야.',docs:['보완 답변서'],agency:'MFDS',time:'30~60일',detail:{주요내용:['서류 완결성 검토','누락 항목 보완 요청','기술 심사 전 단계'],필요서류:['보완 서류 (요청 시)'],주의사항:['보완 기한 미준수 시 신청 취하 처리']},ai_q:'MFDS 의료기기 서류 심사에서 자주 보완 요청되는 항목은 무엇인가'},
+          {id:'sub3',title:'기술 심사',desc:'MFDS 전문 심사관이 기술 문서·시험 자료·임상 데이터를 심층 검토.',docs:['추가 자료 (요청시)'],agency:'MFDS 의료기기심사부',time:'3~12개월',detail:{주요내용:['안전성·유효성 심사','성능 기준 적합성 검토','임상 데이터 타당성 평가','전문가 자문 위원회'],필요서류:['추가 임상 자료 (요청시)','시험 추가 자료'],주의사항:['심사관 질의에 신속 대응이 핵심 (30일 내 답변 권장)']},importance:'important',ai_q:'MFDS 의료기기 기술심사 과정에서 심사관이 중점 검토하는 항목은 무엇인가'},
+          {id:'sub4',title:'GMP 적합성 조사',desc:'제조소 현장 실사. 서류심사와 병행 또는 이후 진행.',docs:['현장 실사 준비 체크리스트'],agency:'MFDS GMP 조사팀',time:'1~3개월',detail:{주요내용:['제조소 현장 방문 조사','품질시스템 실사','문서·기록 검토','시정 조치(CAPA) 확인'],필요서류:['내부 감사 기록','CAPA 기록','교육 훈련 기록'],주의사항:['중대 부적합 발견 시 허가 보류']},ai_q:'MFDS 의료기기 GMP 현장 실사 시 주요 점검 항목과 부적합 사례를 설명해줘'},
+        ]},
+        {id:'approve',name:'D. 허가 완료 및 사후 관리',steps:[
+          {id:'app1',title:'허가증 발급',desc:'심사 완료 후 허가증(또는 인증서·신고증) 발급. 제품 출시 가능.',docs:['허가증'],agency:'MFDS',time:'발급 즉시',detail:{주요내용:['허가증 원본 수령','허가 번호 확인','허가 조건 확인 (조건부 허가 여부)'],필요서류:['수수료 납부 완료 확인'],주의사항:['허가증 분실 시 재발급 신청 필요']},importance:'important',ai_q:'MFDS 의료기기 허가증 발급 후 확인해야 할 허가 조건과 사후 의무사항은 무엇인가'},
+          {id:'app2',title:'UDI 등록',desc:'Unique Device Identification 등록. 유통 전 의무.',docs:['UDI 등록 자료'],agency:'MFDS UDIKOREA',time:'1~2주',detail:{주요내용:['UDIKOREA 시스템 등록','DI(Device Identifier) 부여','UDI 라벨 적용'],필요서류:['허가증','제품 규격 자료'],주의사항:['UDI 미등록 시 유통 금지']},ai_q:'의료기기 UDI 등록 절차와 MFDS UDIKOREA 시스템 사용 방법을 설명해줘'},
+          {id:'app3',title:'시판 후 안전관리 (PMS)',desc:'허가 후 지속적 안전성 모니터링 의무. 이상사례 보고 체계 구축.',docs:['PMS 계획서','이상사례 보고서'],agency:'MFDS',time:'지속',detail:{주요내용:['이상사례(AE) 모니터링','정기 안전성 보고서 제출','리콜 절차 수립','변경 허가 관리'],필요서류:['PMS 계획서','이상사례 보고 양식'],주의사항:['중대 이상사례는 15일 내 보고 의무']},ai_q:'의료기기 시판 후 안전관리(PMS) 의무사항과 이상사례 보고 기준을 설명해줘'},
+        ]},
+      ]
+    },
+    us:{
+      title:'의료기기 미국(FDA) 허가',
+      agency:'U.S. Food and Drug Administration (FDA)',
+      total_time:'3개월~3년+',
+      phases:[
+        {id:'pre',name:'A. 제품 분류 및 경로 결정',steps:[
+          {id:'pre1',title:'FDA 제품 분류 확인',desc:'FDA Product Code 및 등급(Class I/II/III) 확인. 21 CFR을 통해 분류.',docs:['Product Classification DB 검색 결과'],agency:'FDA CDRH',time:'1~2주',detail:{주요내용:['FDA Product Classification Database 검색','Class I(저위험)~III(고위험) 분류','Regulation Number 및 Product Code 확인','규제 경로 결정 (Exempt/510(k)/PMA)'],필요서류:['제품 설명서','의도된 사용 목적 기술서'],주의사항:['잘못된 분류 시 Warning Letter 발행 가능']},importance:'critical',ai_q:'FDA 의료기기 Class I·II·III 분류 기준과 각 등급별 규제 요건을 21 CFR 기준으로 설명해줘'},
+          {id:'pre2',title:'510(k) vs PMA vs De Novo 결정',desc:'Class II는 주로 510(k), Class III는 PMA, 신규 기술은 De Novo 신청.',docs:['Predicate Device 검색 결과'],agency:'FDA',time:'1~2주',detail:{주요내용:['510(k): 동등 제품(Predicate) 존재 시','PMA: Class III 고위험 장치','De Novo: 신규 저위험 기기','Exempt: Class I 대부분'],필요서류:['Predicate Device 허가 자료'],주의사항:['PMA는 비용 수백만 달러, 기간 수년 소요 가능']},importance:'critical',ai_q:'FDA 510(k)와 PMA의 차이점, 제출 요건 및 심사 기간을 비교 설명해줘'},
+        ]},
+        {id:'doc',name:'B. 기술 문서 준비',steps:[
+          {id:'doc1',title:'Design History File (DHF) 구축',desc:'21 CFR 820.30에 따른 설계 개발 문서 전체 관리.',docs:['설계 사양서','검증·확인 프로토콜'],agency:'자체',time:'2~4개월',detail:{주요내용:['Design Input/Output','Design Reviews','Design Verification & Validation','Design Transfer & Changes'],필요서류:['설계 사양서','V&V 프로토콜 및 보고서','위험관리 파일(ISO 14971)'],주의사항:['FDA QSR(21 CFR 820) 전체 준수 필수']},importance:'critical',ai_q:'FDA 21 CFR 820.30 Design Control 요건과 DHF 구성 항목을 설명해줘'},
+          {id:'doc2',title:'성능·안전성 시험',desc:'FDA Guidance 기반 시험. FDCA 513(i) 기준 실질적 동등성 입증.',docs:['시험성적서','벤치 테스트 보고서'],agency:'FDA-accredited Lab',time:'1~3개월',detail:{주요내용:['Bench Testing (성능 기준)','Biocompatibility (ISO 10993)','Electrical Safety (IEC 60601)','EMC Testing (FCC/IEC)','Software Validation (IEC 62304)'],필요서류:['Test Reports','Test Protocols'],주의사항:['FDA Recognized Standards 사용 권장']},ai_q:'FDA 510(k) 제출을 위한 필수 성능 시험 항목과 Recognized Standards 목록을 설명해줘'},
+          {id:'doc3',title:'510(k) 신청서 작성',desc:'FDA eSTAR 플랫폼 사용. Traditional/Abbreviated/Special 510(k) 중 선택.',docs:['510(k) Summary','Device Description','Performance Testing Data'],agency:'자체 작성',time:'1~2개월',detail:{주요내용:['Device Description','Substantial Equivalence Comparison','Performance Testing Summary','Labeling Draft','Biocompatibility Summary'],필요서류:['21 CFR 807.87 요건 전체'],주의사항:['eSTAR 템플릿 미준수 시 즉시 반려(Refuse to Accept)']},importance:'critical',ai_q:'FDA 510(k) 신청서 구성 요건과 eSTAR 플랫폼 사용 방법을 설명해줘'},
+        ]},
+        {id:'submit',name:'C. 제출 및 심사',steps:[
+          {id:'sub1',title:'Pre-Submission (Q-Sub) 미팅',desc:'본 신청 전 FDA와 사전 미팅. 심사 기간 단축에 효과적.',docs:['Pre-Sub 요청서','질문 목록'],agency:'FDA CDRH',time:'3~6개월 (스케줄)',detail:{주요내용:['신청 전략 사전 확인','Critical Testing Issues 해소','FDA 피드백 문서화'],필요서류:['Pre-Submission Package'],주의사항:['선택사항이나 복잡 제품은 강력 권장']},ai_q:'FDA Pre-Submission(Q-Sub) 미팅의 목적과 효과적인 준비 방법을 설명해줘'},
+          {id:'sub2',title:'510(k) 제출',desc:'FDA CDRH 전자 제출 시스템(eCopy) 통해 제출. 수수료 납부.',docs:['510(k) 전체 패키지','수수료 납부 영수증'],agency:'FDA CDRH',time:'제출일',detail:{주요내용:['eCopy + 수수료 동시 제출','FDA 접수 확인 (K Number 발행)','Acceptance Review (15일)'],필요서류:['510(k) Complete Package','User Fee 납부 ($6,000~$20,000+)'],주의사항:['RTA(Refuse to Accept) 기준 엄격 — 서류 완성도 핵심']},importance:'critical',ai_q:'FDA 510(k) 제출 절차, 수수료 및 RTA 기준을 설명해줘'},
+          {id:'sub3',title:'FDA 심사 대응',desc:'Substantive Review 중 추가 정보 요청(AI/MAI)에 신속 대응.',docs:['AI/MAI 답변서'],agency:'FDA Reviewer',time:'90~180일',detail:{주요내용:['Additional Information(AI) 요청 대응','Major Deficiency(MAI) 해소','Interactive Review 활용'],필요서류:['보완 자료 (요청 시)'],주의사항:['FDA 응답 기한(180일) 내 미답 시 신청 포기 처리']},importance:'important',ai_q:'FDA 510(k) 심사 중 AI/MAI 요청의 주요 내용과 효과적인 대응 방법을 설명해줘'},
+        ]},
+        {id:'approve',name:'D. 510(k) 클리어런스 및 사후',steps:[
+          {id:'app1',title:'510(k) Clearance 수령',desc:'FDA 클리어런스 레터 수령. 미국 내 유통 가능.',docs:['510(k) Decision Letter'],agency:'FDA',time:'발급 즉시',detail:{주요내용:['Clearance Letter 원본 보관','K Number 기록','조건부 조건 확인'],필요서류:['없음 (수령만)'],주의사항:['Clearance ≠ 안전성 보증. 지속 모니터링 필수']},importance:'critical',ai_q:'FDA 510(k) Clearance 후 의무적으로 해야 하는 사후 관리 사항을 설명해줘'},
+          {id:'app2',title:'FDA 등록 및 Device Listing',desc:'매년 등록 갱신 의무. eRegistration 시스템 사용.',docs:['FDA Registration 확인서'],agency:'FDA',time:'1주',detail:{주요내용:['Establishment Registration','Device Listing (510(k) K Number 등록)','연간 갱신 (10월)'],필요서류:['없음 (온라인 등록)','User Fee 납부'],주의사항:['미등록 시 수입 금지 및 Warning Letter']},ai_q:'FDA Establishment Registration과 Device Listing 절차 및 갱신 주기를 설명해줘'},
+          {id:'app3',title:'MDR (Medical Device Reporting)',desc:'이상사례 보고 의무. 사망·중상 관련 30일/5일 보고.',docs:['MDR 보고서'],agency:'FDA MedWatch',time:'지속',detail:{주요내용:['사망·중상 유발 시 30일 내 보고','즉각 위해 시 5일 내 보고','MDR 데이터베이스 등록'],필요서류:['Form FDA 3500A'],주의사항:['미보고 시 Warning Letter·리콜 명령 가능']},ai_q:'FDA MDR(Medical Device Reporting) 의무 보고 기준과 절차를 21 CFR 803 기준으로 설명해줘'},
+        ]},
+      ]
+    },
+    eu:{
+      title:'의료기기 유럽(CE/MDR) 허가',
+      agency:'EU Notified Body + Competent Authority',
+      total_time:'1~3년',
+      phases:[
+        {id:'pre',name:'A. 분류 및 경로 결정',steps:[
+          {id:'pre1',title:'MDR 2017/745 등급 분류',desc:'EU MDR Annex VIII 분류 규칙 적용. Class I/IIa/IIb/III.',docs:['분류 근거 문서'],agency:'자체 판단 + NB 확인',time:'1~2주',detail:{주요내용:['MDR Annex VIII 22개 분류 규칙 적용','Class I(최저)~III(최고위험)','지속 착용 기간, 침습성, 작동원리 기반'],필요서류:['제품 설명서','의도된 목적 기술서'],주의사항:['MDD 대비 MDR은 등급 상향된 품목 다수']},importance:'critical',ai_q:'EU MDR 2017/745 Annex VIII 분류 규칙과 MDD 대비 변경된 주요 등급을 설명해줘'},
+          {id:'pre2',title:'Notified Body (NB) 선정',desc:'Class IIa 이상은 NB 심사 필수. EU 내 NB 선정.',docs:['NB 계약서'],agency:'선정된 Notified Body',time:'1~3개월',detail:{주요내용:['NANDO DB에서 NB 검색','제품 분야별 지정 NB 선택','계약 체결 및 심사 일정 수립'],필요서류:['Application Package'],주의사항:['Brexit 후 영국 NB는 EU MDR 불인정 — EU 내 NB 필수']},importance:'critical',ai_q:'EU MDR Notified Body 선정 기준과 현재 활성화된 주요 NB 목록을 설명해줘'},
+        ]},
+        {id:'doc',name:'B. 기술 문서 (Technical File)',steps:[
+          {id:'doc1',title:'Technical Documentation 작성',desc:'MDR Annex II & III 요건. QMS 포함.',docs:['Device Description','Design Documents','Label Draft'],agency:'자체',time:'3~6개월',detail:{주요내용:['Annex II: Technical Documentation','Annex III: Post-Market Technical Documentation','제품 설명 및 의도된 목적','설계·제조 정보','안전성·성능 요건(GSPR)'],필요서류:['MDR Annex II 전 항목'],주의사항:['MDD Technical File 대비 요구 수준 대폭 강화']},importance:'critical',ai_q:'EU MDR Annex II Technical Documentation 구성 요건과 작성 시 핵심 주의사항을 설명해줘'},
+          {id:'doc2',title:'임상 평가 보고서 (CER)',desc:'MDR Article 61. 전 등급 의무. 임상 데이터 또는 문헌 기반.',docs:['CER','PMCF Plan'],agency:'Clinical Evaluator (자격자)',time:'2~4개월',detail:{주요내용:['MEDDEV 2.7/1 Rev 4 기준','Equivalence Claim or Own Clinical Data','Literature Review (PubMed 등)','CER 작성자 자격 요건 강화'],필요서류:['Clinical Evaluation Report','Literature Search Protocol','PMCF Plan'],주의사항:['CER 부적절 시 NB에서 가장 많이 지적되는 항목']},importance:'critical',ai_q:'EU MDR 임상평가보고서(CER) 작성 요건과 MEDDEV 2.7/1 Rev 4 기준을 설명해줘'},
+          {id:'doc3',title:'위험 관리 파일 (ISO 14971)',desc:'전 제품 수명 주기 위험관리. MDR Annex I GSPR 항목과 연계.',docs:['Risk Management File'],agency:'자체',time:'1~2개월',detail:{주요내용:['위험 식별·분석·평가','위험 통제 조치','잔여 위험 평가','ISO 14971:2019 준수'],필요서류:['Risk Management Plan','Risk Assessment Report','Risk Management Report'],주의사항:['GSPR 전 항목과 Risk File 상호 참조 필수']},ai_q:'ISO 14971 위험관리 절차와 EU MDR GSPR과의 연계 방법을 설명해줘'},
+        ]},
+        {id:'submit',name:'C. NB 심사 및 CE 마킹',steps:[
+          {id:'sub1',title:'NB 심사 신청',desc:'Technical File + QMS 문서 NB 제출. NB가 적합성 검토.',docs:['Technical File 전체','QMS 문서'],agency:'Notified Body',time:'6~18개월',detail:{주요내용:['Application 제출','NB에서 완결성 검토','Technical Documentation Review','QMS Audit (ISO 13485)'],필요서류:['MDR Annex II·III 전체','ISO 13485 인증서'],주의사항:['NB 심사 적체로 대기 기간 길어짐 (2024년 기준 1년 이상 가능)']},importance:'critical',ai_q:'EU MDR Notified Body 심사 절차, 소요 기간 및 현재 NB 심사 적체 현황을 설명해줘'},
+          {id:'sub2',title:'EU Declaration of Conformity 작성',desc:'제조사가 적합성 선언. CE 마킹 부착 근거.',docs:['Declaration of Conformity'],agency:'제조사',time:'1주',detail:{주요내용:['MDR Annex IV 형식 준수','적용 MDR 조항 명시','NB 번호 및 인증서 번호 포함'],필요서류:['NB 인증서','Technical File 완성본'],주의사항:['선언 내용 부정확 시 리콜 및 벌금']},ai_q:'EU MDR Declaration of Conformity 작성 요건과 MDR Annex IV 형식을 설명해줘'},
+          {id:'sub3',title:'CE 마킹 적용 및 EUDAMED 등록',desc:'CE 마킹 및 NB 번호 제품에 적용. EUDAMED 등록 의무.',docs:['라벨 최종본','EUDAMED 등록 확인'],agency:'EUDAMED',time:'1~2주',detail:{주요내용:['CE Mark + NB 번호 라벨 적용','EUDAMED 제조사·제품 등록','UDI 시스템 적용'],필요서류:['인증서','제품 라벨'],주의사항:['EUDAMED 미등록 시 EU 내 판매 불가 (단계적 의무화)']},importance:'critical',ai_q:'EU MDR CE 마킹 적용 규정과 EUDAMED 등록 절차를 설명해줘'},
+        ]},
+        {id:'approve',name:'D. 사후 감시 (PMS/PMCF)',steps:[
+          {id:'app1',title:'PMS 시스템 운영',desc:'MDR Article 83~86. 체계적 시판 후 안전성 모니터링.',docs:['PMS Plan','PSUR/SSCP'],agency:'자체 + NB',time:'지속',detail:{주요내용:['PMS Plan 수립 및 실행','PSUR (Periodic Safety Update Report)','SSCP (Summary of Safety & Clinical Performance)','PMCF 계획 실행'],필요서류:['PMS Plan','PMCF Plan & Report','PSUR/SSCP'],주의사항:['Class III는 1년, IIb는 2년 주기 PSUR 의무']},importance:'important',ai_q:'EU MDR PMS 시스템 요건과 PSUR·SSCP 제출 주기를 설명해줘'},
+        ]},
+      ]
+    },
+    jp:{title:'의료기기 일본(PMDA) 허가',agency:'PMDA / 厚生労働省',total_time:'1~3년',phases:[{id:'pre',name:'A. 분류 및 신청 경로',steps:[{id:'pre1',title:'클래스 분류 (약사법)',desc:'클래스 I~IV 분류. 후생노동성 고시 기준.',docs:['품목 분류표'],agency:'PMDA',time:'1~2주',detail:{주요내용:['Class I: 일반 의료기기','Class II: 관리 의료기기','Class III/IV: 고도 관리 의료기기','약사법 제2조 기준'],필요서류:['제품 설명서'],주의사항:['Class III/IV는 PMDA 사전 상담 강력 권장']},importance:'critical',ai_q:'일본 약사법상 의료기기 클래스 분류 기준과 각 클래스별 허가 경로를 설명해줘'},{id:'pre2',title:'PMDA 사전 상담',desc:'복잡 제품 필수. 심사 전략 확인.',docs:['사전상담 자료'],agency:'PMDA',time:'3~6개월',detail:{주요내용:['심사 경로 확인','필요 시험 항목 확인','외국 자료 활용 가능 여부'],필요서류:['사전상담 신청서','제품 개요서'],주의사항:['사전상담 없으면 본 심사에서 대폭 지연 가능']},ai_q:'PMDA 의료기기 사전상담 절차와 효과적인 준비 방법을 설명해줘'}]},{id:'doc',name:'B. 기술 서류 준비',steps:[{id:'doc1',title:'承認申請書 및 첨부 자료',desc:'Class III/IV는 PMDA 제출. CTD-like 형식.',docs:['承認申請書','技術文書'],agency:'자체',time:'2~4개월',detail:{주요내용:['제품 개요','안전성·유효성 자료','규격 및 시험방법','제조방법'],필요서류:['承認申請書','添付資料(첨부자료) 전체'],주의사항:['일본어 제출 원칙. 영문 자료는 일본어 번역본 첨부']},importance:'critical',ai_q:'일본 PMDA 의료기기 承認申請書 구성 요건과 첨부 자료 목록을 설명해줘'},{id:'doc2',title:'QMS 적합성 조사',desc:'Class III/IV 제조소 QMS 실사.',docs:['QMS 적합성 자료'],agency:'PMDA·등록인증기관',time:'3~6개월',detail:{주요내용:['ISO 13485 기반','제조소 현장 실사','품질 시스템 서류 검토'],필요서류:['품질매뉴얼','제조공정서','QMS 관련 SOP'],주의사항:['해외 제조소는 서면 조사 가능']},ai_q:'일본 의료기기 QMS 적합성 조사 기준과 해외 제조소 조사 방법을 설명해줘'}]},{id:'submit',name:'C. 심사 및 허가',steps:[{id:'sub1',title:'PMDA 심사',desc:'기술 심사 및 GMP 조사 병행.',docs:['보완 자료'],agency:'PMDA',time:'12~18개월',detail:{주요내용:['기술 심사','임상 자료 검토','실질적 심사 (Substantial Review)'],필요서류:['추가 자료 (요청 시)'],주의사항:['심사 기간 중 추가 질의 신속 대응 필요']},importance:'critical',ai_q:'PMDA 의료기기 심사 프로세스와 주요 심사 항목을 설명해줘'}]},{id:'approve',name:'D. 승인 및 판매',steps:[{id:'app1',title:'承認 취득 및 판매 개시',desc:'厚生労働省 承認書 취득 후 판매.',docs:['承認書'],agency:'厚生労働省',time:'발급 즉시',detail:{주요내容:['承認書 원본 보관','承認 조건 확인','일본 현지 법인 또는 선임제조판매업자 필요'],필요서류:['없음'],주의사항:['외국 기업은 일본 내 법인 또는 제조판매업자 지정 필수']},importance:'critical',ai_q:'일본 의료기기 承認 취득 후 현지 제조판매업자 요건과 판매 개시 절차를 설명해줘'}]}]},
+    cn:{title:'의료기기 중국(NMPA) 등록',agency:'国家药品监督管理局 (NMPA)',total_time:'1~3년',phases:[{id:'pre',name:'A. 분류 및 현지 대리인',steps:[{id:'pre1',title:'제품 분류 (国家标准)',desc:'Class I~III. NMPA 분류 목록 확인.',docs:['분류 확인서'],agency:'NMPA',time:'2~4주',detail:{주요내용:['Class I: 备案','Class II: 注册(성급)','Class III: 注册(국가급)','NMPA 의료기기 분류 목록 검색'],필요서류:['제품 설명서','사용 목적 기술서'],주의사항:['중국 분류 체계는 타국과 상이할 수 있음']},importance:'critical',ai_q:'중국 NMPA 의료기기 분류 기준과 Class별 등록 경로를 설명해줘'},{id:'pre2',title:'중국 내 대리인 지정',desc:'외국 제조사는 중국 내 합법 대리인(代理人) 필수.',docs:['대리인 수권서'],agency:'자체',time:'1~2주',detail:{주요내용:['China Legal Authorized Representative 지정','수권서 공증 및 인증','NMPA에 대리인 정보 등록'],필요서류:['위임장','공증서','영사 인증서'],주의사항:['대리인 없으면 등록 신청 불가']},importance:'critical',ai_q:'중국 NMPA 의료기기 외국 제조사 대리인 지정 요건과 절차를 설명해줘'}]},{id:'doc',name:'B. 등록 자료 준비',steps:[{id:'doc1',title:'技术文件 작성',desc:'NMPA 등록 신청 서류. 중국어 번역 필수.',docs:['技术文件','中文번역본'],agency:'자체',time:'2~4개월',detail:{주요내용:['제품 기술 요구사항','생산 제조 정보','안전성·유효성 연구 자료','임상 평가 자료'],필요서류:['중국어 기술문서 전체'],주의사항:['모든 서류 중국어 공증 번역 필수. 영문 자료 불인정']},importance:'critical',ai_q:'중국 NMPA 의료기기 技术文件 구성 요건과 중국어 번역·공증 절차를 설명해줘'},{id:'doc2',title:'중국 내 임상시험 또는 동등성',desc:'Class III는 원칙적 중국 내 임상 필요. 동등성 인정 가능.',docs:['임상 자료','동등성 자료'],agency:'중국 임상기관',time:'1~2년',detail:{주요내용:['중국 GCP 임상시험','해외 임상 데이터 수용 요건','동등성 경로 (Equivalent Device)'],필요서류:['임상시험 결과 보고서','해외 허가 자료 (참고용)'],주의사항:['해외 임상은 NMPA 인정 요건 엄격']},ai_q:'중국 NMPA 의료기기 임상시험 요건과 해외 임상 자료 수용 기준을 설명해줘'}]},{id:'submit',name:'C. 등록 신청 및 심사',steps:[{id:'sub1',title:'NMPA 등록 신청',desc:'Class III는 NMPA 직접 신청, Class II는 성급 NMPA.',docs:['등록신청서','기술문서 일체'],agency:'NMPA',time:'신청일',detail:{주요내용:['온라인 신청 시스템 사용','기술 서류 업로드','수수료 납부'],필요서류:['注册申请表','技术文件','临床评价资料'],주의사항:['서류 불완전 시 보완 요청 (通知)']},importance:'critical',ai_q:'중국 NMPA 의료기기 등록 신청 절차와 온라인 시스템 사용 방법을 설명해줘'}]},{id:'approve',name:'D. 등록 완료',steps:[{id:'app1',title:'医疗器械注册证 취득',desc:'NMPA 심사 완료 후 등록증 발급.',docs:['注册证'],agency:'NMPA',time:'발급 즉시',detail:{주요내용:['注册证 원본 수령','등록 번호 확인','등록 조건 이행'],필요서류:['없음'],주의사항:['注册证 유효기간 5년, 갱신 필요']},importance:'critical',ai_q:'중국 NMPA 의료기기 注册证 취득 후 사후 관리 의무와 갱신 절차를 설명해줘'}]}]}
+  },
+  pharma:{
+    kr:{
+      title:'의약품 한국(MFDS) 품목허가',
+      agency:'식품의약품안전처 (MFDS)',
+      total_time:'1~3년',
+      phases:[
+        {id:'pre',name:'A. 사전 분류 및 전략',steps:[
+          {id:'pre1',title:'의약품 분류 및 허가 유형 결정',desc:'전문의약품·일반의약품·희귀의약품 분류. 신약·자료제출의약품·제네릭 경로 결정.',docs:['분류 근거'],agency:'MFDS',time:'1~2주',detail:{주요내용:['신약 (New Drug): 새로운 성분·효능','자료제출의약품: 이미 허가된 성분 새 적응증','제네릭: 오리지널 만료 후 동등성 입증'],필요서류:['제품 개요서'],주의사항:['경로 선택에 따라 자료 요건 완전 상이']},importance:'critical',ai_q:'한국 MFDS 의약품 허가 경로(신약·자료제출·제네릭) 별 요건과 차이를 설명해줘'},
+          {id:'pre2',title:'특허 및 독점권 확인',desc:'오리지널 특허 만료 여부 및 자료독점권 확인. 제네릭 출시 가능 시점 판단.',docs:['특허 검색 결과'],agency:'특허청·MFDS',time:'1~2주',detail:{주요내용:['특허 만료일 확인','자료독점권(6~10년) 기간 확인','특허 회피 전략 검토'],필요서류:['특허 검색 보고서'],주의사항:['특허 침해 시 허가 취소 및 손해배상']},ai_q:'한국 의약품 특허 연계 제도와 자료독점권 기간을 설명해줘'},
+        ]},
+        {id:'doc',name:'B. CTD 자료 준비',steps:[
+          {id:'doc1',title:'Module 2~3: 품질(CMC) 자료',desc:'원료·완제품 규격, 제조방법, 안정성 시험. ICH Q1~Q11 기준.',docs:['품질 자료 전체','안정성 시험 보고서'],agency:'자체',time:'1~2년',detail:{주요내용:['원료의약품 규격·시험방법','완제의약품 처방·제조방법','공정 밸리데이션','안정성 시험 (ICH Q1A 기준)'],필요서류:['Module 2.3 Quality Overall Summary','Module 3 전체'],주의사항:['안정성 데이터 최소 6개월 가속·장기 보존 필요']},importance:'critical',ai_q:'ICH CTD Module 3 품질(CMC) 자료 구성 요건과 MFDS 제출 기준을 설명해줘'},
+          {id:'doc2',title:'Module 4: 비임상 자료',desc:'독성시험, 약리시험. ICH S·S·E 시리즈 기준.',docs:['독성시험 보고서','약리시험 보고서'],agency:'GLP 기관',time:'6개월~2년',detail:{주요내용:['안전성 약리','약동학','반복투여독성','생식독성','발암성 (필요시)','유전독성'],필요서류:['Module 4 Non-clinical Study Reports'],주의사항:['GLP(Good Laboratory Practice) 기관 수행 필수']},ai_q:'의약품 비임상 독성시험 ICH S 시리즈 요건과 GLP 기준을 설명해줘'},
+          {id:'doc3',title:'Module 5: 임상 자료',desc:'Phase I~III 임상시험. ICH E 시리즈 기준. MFDS IND 승인 선행.',docs:['임상시험계획 승인서','임상시험 보고서'],agency:'식약처 임상심사팀',time:'3~10년',detail:{주요내용:['IND (임상시험계획) 승인','Phase I: 안전성·약동학','Phase II: 유효성 탐색','Phase III: 무작위 대조 임상'],필요서류:['Module 5 전체','임상시험 계획서·결과보고서','통계 분석 보고서'],주의사항:['임상시험은 전체 허가 과정에서 가장 시간·비용 소요']},importance:'critical',ai_q:'한국 MFDS 의약품 임상시험 IND 신청 절차와 Phase별 요건을 설명해줘'},
+        ]},
+        {id:'submit',name:'C. 품목허가 신청',steps:[
+          {id:'sub1',title:'CTD 형식으로 품목허가 신청',desc:'의약품안전나라 시스템 온라인 제출.',docs:['CTD Module 1~5 전체'],agency:'MFDS',time:'제출일',detail:{주요내용:['Module 1: 행정 정보 (국내 형식)','Module 2: 요약','Module 3~5: 기술 자료','수수료 납부 (신약 약 1,000만원)'],필요서류:['품목허가신청서','CTD 자료 전체'],주의사항:['서류 불완전 시 보완 요청 → 기간 연장']},importance:'critical',ai_q:'MFDS 의약품 품목허가 CTD 제출 절차와 Module 1 국내 형식 요건을 설명해줘'},
+          {id:'sub2',title:'심사 및 보완 대응',desc:'MFDS 품질·비임상·임상 심사관 동시 심사. 보완 요청 신속 대응.',docs:['보완 답변서'],agency:'MFDS 의약품심사부',time:'12~24개월',detail:{주요내용:['품질·비임상·임상 동시 심사','보완 요청 시 90일 내 제출','자문회의 필요 시 추가 기간'],필요서류:['보완 자료'],주의사항:['보완 기한 미준수 시 신청 취하']},importance:'important',ai_q:'MFDS 의약품 심사 과정에서 자주 보완 요청되는 항목과 효과적인 대응 전략은?'},
+        ]},
+        {id:'approve',name:'D. 허가 완료 및 GMP',steps:[
+          {id:'app1',title:'제조·수입 GMP 실사',desc:'국내 제조는 MFDS GMP 실사, 수입은 외국 GMP 인정.',docs:['GMP 적합인정서'],agency:'MFDS GMP팀',time:'3~6개월',detail:{주요내용:['제조소 현장 실사','KGxP 기준 적용','원료·완제 제조소 각각 실사'],필요서류:['품질매뉴얼','SOP','배치 기록'],주의사항:['GMP 부적합 시 품목허가 불가']},importance:'critical',ai_q:'MFDS 의약품 GMP 실사 기준과 수입의약품 외국 GMP 인정 요건을 설명해줘'},
+          {id:'app2',title:'품목허가증 수령 및 생산',desc:'허가증 수령 후 생산·판매 가능. 표시 기재 사항 준수.',docs:['품목허가증'],agency:'MFDS',time:'발급 즉시',detail:{주요내용:['품목허가번호 확인','허가 조건 이행','약가 등재 신청 (급여 시)'],필요서류:['없음'],주의사항:['허가 내용과 다른 표시 광고 금지']},importance:'critical',ai_q:'한국 의약품 품목허가 후 약가 등재 절차와 급여 의약품 등재 요건을 설명해줘'},
+          {id:'app3',title:'시판 후 안전관리 (PV)',desc:'약물감시(Pharmacovigilance). 이상약물반응 수집·보고.',docs:['PV 보고서','안전성 정기 보고서'],agency:'MFDS',time:'지속',detail:{주요내용:['이상약물반응(ADR) 수집·평가','15일 보고 의무 (중대 이상반응)','안전성 정기보고서(PSUR) 제출','재심사 제도 (신약 6년)'],필요서류:['PV 시스템 구축','PSUR'],주의사항:['신약은 6년 재심사 기간 동안 추가 모니터링 의무']},ai_q:'한국 의약품 약물감시(PV) 의무사항과 이상약물반응 보고 기준을 설명해줘'},
+        ]},
+      ]
+    },
+    us:{title:'의약품 미국(FDA) NDA/ANDA',agency:'FDA CDER',total_time:'1~4년',phases:[{id:'pre',name:'A. 전략 수립',steps:[{id:'pre1',title:'신약(NDA) vs 제네릭(ANDA) 결정',desc:'신약은 NDA, 제네릭은 ANDA. 505(b)(2)는 중간 경로.',docs:['전략 문서'],agency:'자체',time:'1주',detail:{주요내용:['NDA 505(b)(1): 전체 자료 신규 제출','NDA 505(b)(2): 기존 자료 일부 활용','ANDA: 생동성 입증으로 단축'],필요서류:['개발 전략서'],주의사항:['505(b)(2) 경로가 비용·기간 최적화에 유리']},importance:'critical',ai_q:'FDA NDA 505(b)(1), 505(b)(2) 및 ANDA 경로의 차이와 선택 기준을 설명해줘'}]},{id:'doc',name:'B. CTD 자료 준비',steps:[{id:'doc1',title:'CMC (Chemistry, Manufacturing, Controls)',desc:'원료·완제품 품질 자료. ICH Q 시리즈 기준.',docs:['CMC Section (Module 3)'],agency:'자체',time:'1~2년',detail:{주요내용:['Drug Substance (원료)','Drug Product (완제)','Container/Closure System','Stability Studies (ICH Q1)'],필요서류:['Module 3 전체'],주의사항:['ICH Q11 원료 개발 자료 포함 필요']},importance:'critical',ai_q:'FDA NDA CMC 섹션 요건과 ICH Q 시리즈 적용 기준을 설명해줘'},{id:'doc2',title:'임상 자료 (Module 5)',desc:'Phase I~III. FDA IND 승인 후 수행.',docs:['IND','CSR (Clinical Study Report)'],agency:'FDA CDER',time:'3~10년',detail:{주요내용:['IND 신청 및 승인','Phase I~III 수행','FDA Advisory Committee 필요 시','Breakthrough Therapy / Fast Track 지정 가능'],필요서류:['IND Package','CSR 전체'],주의사항:['FDA와 긴밀한 소통 (Type A/B/C Meeting) 필수']},importance:'critical',ai_q:'FDA IND 신청 절차와 신속 심사 제도(BTD·Fast Track·Priority Review)를 설명해줘'}]},{id:'submit',name:'C. NDA 제출 및 심사',steps:[{id:'sub1',title:'NDA 제출 (eCTD 형식)',desc:'FDA eCTD 형식으로 전자 제출. PDUFA 목표 심사 기간 적용.',docs:['NDA eCTD 패키지'],agency:'FDA CDER',time:'제출일',detail:{주요내용:['eCTD 형식 필수','표준 심사: 12개월, 우선 심사: 6개월','PDUFA User Fee 납부 (신약 약 $4백만)'],필요서류:['Module 1~5 전체 eCTD'],주의사항:['RTF(Refuse to File) 기준 엄격']},importance:'critical',ai_q:'FDA NDA eCTD 제출 요건과 PDUFA 심사 목표 기간을 설명해줘'}]},{id:'approve',name:'D. 승인 및 사후',steps:[{id:'app1',title:'NDA Approval 수령',desc:'FDA Approval Letter 수령. 미국 내 판매 가능.',docs:['Approval Letter'],agency:'FDA',time:'발급 즉시',detail:{주요내용:['Approval Letter 보관','REMS(위험관리) 조건 확인','라벨(PI/PPI) 최종 확정'],필요서류:['없음'],주의사항:['Post-marketing Commitment 조건 이행 필수']},importance:'critical',ai_q:'FDA NDA 승인 후 Post-Marketing Commitment와 REMS 요건을 설명해줘'}]}]},
+    eu:{title:'의약품 유럽(EMA) MAA',agency:'EMA / National Competent Authority',total_time:'1~3년',phases:[{id:'pre',name:'A. 허가 경로 선택',steps:[{id:'pre1',title:'Centralised vs National Procedure',desc:'EMA 중앙화 절차 vs 국가별 절차 선택.',docs:['경로 분석서'],agency:'EMA',time:'1주',detail:{주요내용:['중앙화(CP): 항암·바이오·희귀의약품 의무','MRP/DCP: 2개국 이상 국가별','National: 단일국가 허가'],필요서류:['없음'],주의사항:['CP는 EU 전체 동시 허가 가능']},importance:'critical',ai_q:'EMA 의약품 허가 경로(중앙화·상호인정·분산)의 차이와 선택 기준을 설명해줘'}]},{id:'doc',name:'B. MAA 서류 준비',steps:[{id:'doc1',title:'CTD Module 1~5 (EU 형식)',desc:'Module 1은 EU 형식. Module 2~5는 ICH 공통 형식.',docs:['MAA CTD 전체'],agency:'자체',time:'1~3년',detail:{주요내용:['Module 1: EU 행정 정보','Module 2: 요약','Module 3: 품질(CMC)','Module 4: 비임상','Module 5: 임상'],필요서류:['EU Module 1 체크리스트','Module 2~5 전체'],주의사항:['EPAR 공개 — 민감 정보 CCI 신청 필요']},importance:'critical',ai_q:'EMA MAA CTD 제출 요건과 EU Module 1 특수 요건을 설명해줘'}]},{id:'submit',name:'C. EMA 심사',steps:[{id:'sub1',title:'MAA 제출 및 CHMP 심사',desc:'CHMP 210일 심사 절차. Clock stop 발생 가능.',docs:['MAA 패키지'],agency:'EMA CHMP',time:'210일+',detail:{주요내용:['Day 70: List of Questions','Day 120: Day 120 LoOI','Day 180: List of Outstanding Issues','Day 210: Opinion'],필요서류:['MAA 전체'],주의사항:['Clock stop (보완 기간) 포함 시 1~2년 추가 가능']},importance:'critical',ai_q:'EMA CHMP 210일 심사 절차와 주요 마일스톤을 설명해줘'}]},{id:'approve',name:'D. EC 결정 및 판매',steps:[{id:'app1',title:'EC Marketing Authorisation 수령',desc:'EMA Opinion 후 EU 집행위 결정. EU 전체 판매 가능.',docs:['MA Certificate'],agency:'European Commission',time:'67일',detail:{주요내용:['EC 결정 수령','EPAR 공개','제품 정보(SmPC·PIL) 최종 확정'],필요서류:['없음'],주의사항:['MA 수령 후 3년 내 실제 시판 의무']},importance:'critical',ai_q:'EMA 의약품 승인 후 EC Marketing Authorisation과 EPAR 공개 절차를 설명해줘'}]}]},
+    jp:{title:'의약품 일본(PMDA) 承認',agency:'PMDA / 厚生労働省',total_time:'1~3년',phases:[{id:'pre',name:'A. 사전 상담',steps:[{id:'pre1',title:'PMDA 사전 상담 (対面助言)',desc:'심사 전략 확인. 신약은 필수에 가까움.',docs:['사전상담 자료'],agency:'PMDA',time:'3~6개월',detail:{주요내용:['Phase II/III 자료 제출 전 상담','외국 임상 자료 수용 가능 여부','심사 경로 (우선 심사 등) 확인'],필요서류:['相談申請書','資料概要'],주의사항:['사전상담 없이 신청 시 심사 기간 대폭 연장 가능']},importance:'critical',ai_q:'PMDA 의약품 사전상담(対面助言) 종류와 신청 절차를 설명해줘'}]},{id:'doc',name:'B. CTD 자료',steps:[{id:'doc1',title:'新薬承認申請 CTD 준비',desc:'일본어 요약 필수. 외국 임상 자료 수용 조건부.',docs:['CTD 일본어 요약','Module 3~5'],agency:'자체',time:'1~3년',detail:{주요내용:['Module 2 일본어 요약 필수','일본인 대상 추가 임상 가능','외국 임상 자료 수용 (ICH E5 기준)'],필요서류:['CTD Module 1~5 (일본어 Module 1·2)'],주의사항:['일본 고유 Module 1 형식 준수']},importance:'critical',ai_q:'일본 PMDA 신약 CTD 요건과 외국 임상 자료 수용 ICH E5 기준을 설명해줘'}]},{id:'submit',name:'C. 심사',steps:[{id:'sub1',title:'PMDA 承認審査',desc:'기술 심사 + GMP 조사 병행. 우선 심사 제도 활용 가능.',docs:['보완 자료'],agency:'PMDA',time:'12~24개월',detail:{주요내容:['일반 심사: 18~24개월','우선 심사: 9~12개월','질의 대응 신속 처리'],필요서류:['추가 자료'],주의사항:['심사 중 추가 임상 요청 가능']},importance:'critical',ai_q:'PMDA 신약 심사 우선 심사 제도 요건과 심사 기간을 설명해줘'}]},{id:'approve',name:'D. 承認 및 보험 등재',steps:[{id:'app1',title:'厚労省 承認 취득',desc:'厚生労働省 承認書 수령. 일본 내 판매 가능.',docs:['承認書'],agency:'厚生労働省',time:'발급',detail:{주요내용:['承認書 수령','承認 조건 확인','약가 기준 신청 (보험 등재 위해)'],필요서류:['없음'],주의사항:['承認 후 약가 미등재 시 자비 판매만 가능']},importance:'critical',ai_q:'일본 의약품 承認 후 약가 등재 절차와 보험 의약품 등재 기준을 설명해줘'}]}]},
+    cn:{title:'의약품 중국(NMPA) 注册',agency:'国家药品监督管理局 (NMPA)',total_time:'2~5년',phases:[{id:'pre',name:'A. 분류 및 전략',steps:[{id:'pre1',title:'화학약품 분류 (1~5류)',desc:'1류=신약, 2류=개량신약, 3~5류=제네릭. NMPA 2016년 개혁 이후 기준.',docs:['분류 근거'],agency:'NMPA',time:'2주',detail:{주요내용:['1류: 全球首개 신약','2류: 구조 변경 개량신약','3류: 외국 허가 국내 미허가','4류: 국내 허가 제네릭','5류: 해외 제네릭'],필요서류:['제품 개요서'],주의사항:['3류(외국 신약 수입)는 중국 임상 원칙적 필요']},importance:'critical',ai_q:'중국 NMPA 의약품 분류 체계(1~5류)와 각 분류별 허가 요건을 설명해줘'}]},{id:'doc',name:'B. 자료 준비',steps:[{id:'doc1',title:'CTD 자료 (中文 번역 필수)',desc:'ICH CTD 형식 수용. Module 1은 중국 형식.',docs:['CTD 중국어 번역본'],agency:'자체',time:'1~3년',detail:{주요내容:['중국 특유 Module 1 형식','중국 내 임상 자료 (3류 이상 원칙)','비임상 자료 GLP 기관 수행','안정성: ICH Q1 + 중국 기후조건 추가'],필요서류:['CTD 전체 중국어 번역'],주의사항:['중국어 공증 번역 필수. 비용 상당']},importance:'critical',ai_q:'중국 NMPA 의약품 CTD 자료 요건과 중국 내 임상시험 규정을 설명해줘'}]},{id:'submit',name:'C. 注册 신청',steps:[{id:'sub1',title:'NMPA 药品注册 신청',desc:'온라인 시스템 제출. 심사 기간 매우 길어질 수 있음.',docs:['注册申请资料'],agency:'NMPA',time:'신청일',detail:{주요내容:['eCTD 온라인 제출','기술 심사 + GMP 인증 동시','현장 실사 가능'],필요서류:['药品注册申请表','CTD 全套자료'],주의사항:['심사 대기열 길어 실제 기간 예측 어려움']},importance:'critical',ai_q:'중국 NMPA 의약품 注册 신청 절차와 심사 기간 현황을 설명해줘'}]},{id:'approve',name:'D. 批准 완료',steps:[{id:'app1',title:'药品注册证书 취득',desc:'NMPA 批准 후 注册证书 발급.',docs:['注册证书'],agency:'NMPA',time:'발급',detail:{주요내용:['注册证书 수령','批准号 확인','MAH(药品上市许可持有人) 제도 확인'],필요서류:['없음'],주의사항:['MAH 제도: 제조·판매 분리 가능']},importance:'critical',ai_q:'중국 의약품 MAH(上市许可持有人) 제도와 注册证书 취득 후 의무사항을 설명해줘'}]}]}
+  },
+  cosmetic:{
+    kr:{title:'화장품 한국(MFDS) 등록',agency:'식품의약품안전처 (MFDS)',total_time:'1~3개월',phases:[{id:'pre',name:'A. 제품 분류',steps:[{id:'pre1',title:'화장품·기능성화장품 분류',desc:'일반화장품 vs 기능성화장품 결정. 기능성은 추가 자료 필요.',docs:['분류 근거'],agency:'MFDS',time:'1주',detail:{주요내용:['일반화장품: 책임판매업자 신고','기능성화장품: 심사 또는 보고','기능성 12종 (미백·주름·자외선 등)'],필요서류:['제품 성분표','기능성 해당 여부 검토서'],주의사항:['기능성 허위 표방 시 행정처분']},importance:'critical',ai_q:'한국 기능성화장품 종류와 일반화장품 대비 추가 요건을 설명해줘'}]},{id:'doc',name:'B. 제품 자료 준비',steps:[{id:'doc1',title:'안전성 자료 작성',desc:'화장품 안전기준 등에 관한 규정 기준. 원료 안전성 검토.',docs:['안전성 자료','원료 목록'],agency:'자체',time:'2~4주',detail:{주요내용:['사용 원료 INCI명 확인','사용 금지·제한 원료 확인','안전성 평가 자료 (필요 시)'],필요서류:['원료 목록 및 함량','원료 COA (분석성적서)'],주의사항:['금지 원료 사용 시 즉시 제조·판매 금지']},importance:'critical',ai_q:'한국 화장품법 금지 원료·제한 원료 기준과 안전성 자료 요건을 설명해줘'},{id:'doc2',title:'라벨·표시 기준 준수',desc:'화장품법 제10~12조 표시 기재 사항 확인.',docs:['라벨 시안'],agency:'자체',time:'1~2주',detail:{주요내용:['제품명·내용량·제조번호','전성분 표시','사용기한·제조업자·책임판매업자','주의사항 표시'],필요서류:['최종 라벨 시안'],주의사항:['전성분 미표시·허위 표시 시 행정처분']},ai_q:'한국 화장품 전성분 표시 기준과 라벨 필수 기재 사항을 설명해줘'}]},{id:'submit',name:'C. 제조·수입 신고',steps:[[{id:'sub1',title:'화장품 책임판매업 등록',desc:'화장품을 판매하려는 자는 책임판매업자 등록 필수.',docs:['책임판매업 등록증'],agency:'지방식약청',time:'1~2주',detail:{주요내용:['시설 기준 충족 확인','품질관리 기준서 구비','책임판매관리자 지정'],필요서류:['사업자등록증','시설 현황','품질관리기준서'],주의사항:['미등록 판매 시 형사 처벌']},importance:'critical',ai_q:'한국 화장품 책임판매업자 등록 요건과 절차를 설명해줘'}]]},{id:'approve',name:'D. CGMP 인증 (선택)',steps:[{id:'app1',title:'우수화장품 제조·품질관리기준 (CGMP)',desc:'의무 아님. 취득 시 수출·신뢰도 향상.',docs:['CGMP 인증서'],agency:'MFDS',time:'3~6개월',detail:{주요내용:['ISO 22716 기반','제조소 현장 실사','CGMP 표시 허용'],필요서류:['CGMP 신청서','제조소 현황'],주의사항:['수출 시 CGMP 요구하는 국가 많음']},ai_q:'한국 화장품 CGMP 인증 기준과 ISO 22716 요건을 설명해줘'}]}]},
+    us:{title:'화장품 미국(FDA MoCRA) 등록',agency:'FDA',total_time:'1~2개월',phases:[{id:'pre',name:'A. MoCRA 이해',steps:[{id:'pre1',title:'MoCRA 등록 의무 확인',desc:'2023년 12월부터 FDA에 시설 및 제품 등록 의무화.',docs:['MoCRA 체크리스트'],agency:'FDA',time:'1주',detail:{주요내용:['Facility Registration 의무','Product Listing 의무','Small Business 면제 조건 확인','라벨 및 안전성 요건'],필요서류:['제품 성분 목록','라벨 시안'],주의사항:['2024년 이후 미등록 시 FDA 단속 대상']},importance:'critical',ai_q:'미국 MoCRA 화장품 등록 의무 내용과 Small Business 면제 기준을 설명해줘'}]},{id:'doc',name:'B. 안전성 자료',steps:[{id:'doc1',title:'Safety Substantiation',desc:'안전성 입증 자료 보유 의무. 제출 의무는 없지만 보유 필수.',docs:['안전성 자료'],agency:'자체 보유',time:'2~4주',detail:{주요내용:['원료 안전성 데이터','임상·독성학 자료','INCI 성분명 사용'],필요서류:['Safety Data Files'],주의사항:['FDA 요청 시 즉시 제출 의무']},importance:'important',ai_q:'FDA MoCRA 화장품 Safety Substantiation 요건과 필요 자료를 설명해줘'}]},{id:'submit',name:'C. FDA 등록',steps:[{id:'sub1',title:'Facility Registration & Product Listing',desc:'FDA Cosmetics Direct 시스템 온라인 등록.',docs:['등록 확인서'],agency:'FDA',time:'1~2주',detail:{주요내용:['시설 등록 (12월 31일까지 연간 갱신)','제품 리스팅 (성분 목록 포함)','Responsible Person 지정'],필요서류:['없음 (온라인 직접 입력)'],주의사항:['매년 갱신 필수']},importance:'critical',ai_q:'FDA Cosmetics Direct 시스템을 통한 MoCRA 시설·제품 등록 절차를 설명해줘'}]},{id:'approve',name:'D. 라벨 및 판매',steps:[{id:'app1',title:'FD&C Act 라벨 기준 준수',desc:'21 CFR 701 라벨링 요건. 경고문·성분 표시.',docs:['최종 라벨'],agency:'자체',time:'1주',detail:{주요내용:['성분명 (INCI 역순)','순량·제조사 정보','경고문 (필요 시)','탈모·여드름 등 OTC 해당 시 Drug으로 분류'],필요서류:['최종 라벨 시안'],주의사항:['화장품-Drug 경계선 주의 (효능 표방 시 Drug 규제 적용)']},importance:'critical',ai_q:'FDA 21 CFR 701 화장품 라벨 요건과 화장품-Drug 경계 판단 기준을 설명해줘'}]}]},
+    eu:{title:'화장품 유럽(CPNP) 등록',agency:'European Commission / CPNP',total_time:'1~4주',phases:[{id:'pre',name:'A. EU 규정 이해',steps:[{id:'pre1',title:'EU 화장품 규정 1223/2009 적용 범위',desc:'EU 내 출시 전 CPNP 신고 의무.',docs:['규정 검토서'],agency:'자체',time:'3일',detail:{주요내용:['화장품 정의 확인','금지·제한 성분 확인 (Annex II~VI)','나노 성분 특별 규정 확인'],필요서류:['성분 목록'],주의사항:['Annex II 금지 물질 포함 시 판매 불가']},importance:'critical',ai_q:'EU 화장품 규정 1223/2009 Annex II~VI 성분 제한 기준을 설명해줘'}]},{id:'doc',name:'B. PIF 작성',steps:[{id:'doc1',title:'Product Information File (PIF)',desc:'EU 규정 Article 11. 모든 화장품 필수.',docs:['PIF'],agency:'자체',time:'1~2주',detail:{주요내용:['제품 설명 및 성분 목록','GMP 준수 방법','안전성 평가 보고서 (CPSR)','효능 입증 자료 (클레임 기반)'],필요서류:['CPSR (자격 있는 안전성 평가사 작성)','CosIng 성분 확인'],주의사항:['CPSR은 독성학 자격자 작성 의무']},importance:'critical',ai_q:'EU 화장품 PIF 구성 요건과 CPSR 작성 자격 요건을 설명해줘'}]},{id:'submit',name:'C. CPNP 신고',steps:[{id:'sub1',title:'CPNP 온라인 신고',desc:'CPNP 포털 온라인 신고. 출시 전 신고.',docs:['CPNP 신고 확인서'],agency:'CPNP 포털',time:'1일~1주',detail:{주요내용:['EU Responsible Person 지정 (EU 외 기업)','CPNP 계정 생성','제품 정보·성분 입력','나노 물질 별도 신고 (6개월 전)'],필요서류:['없음 (온라인 직접 입력)'],주의사항:['EU 내 Responsible Person 없으면 신고 불가']},importance:'critical',ai_q:'EU CPNP 화장품 신고 절차와 Responsible Person 요건을 설명해줘'}]},{id:'approve',name:'D. 라벨 및 판매',steps:[{id:'app1',title:'라벨 요건 준수 및 판매',desc:'EU 규정 Article 19 라벨 요건 준수 후 판매.',docs:['최종 라벨'],agency:'자체',time:'1주',detail:{주요내용:['제조사·RP 정보','내용량','사용기한/PAO','성분 목록 (INCI)','주의사항','Lot Number'],필요서류:['최종 라벨 시안'],주의사항:['다국어 라벨 요구 국가 각각 확인']},importance:'important',ai_q:'EU 화장품 규정 Article 19 라벨 필수 기재 사항과 PAO 표시 기준을 설명해줘'}]}]},
+    jp:{title:'화장품 일본(厚生労働省) 허가',agency:'厚生労働省 / 都道府県',total_time:'1~6개월',phases:[{id:'pre',name:'A. 분류 확인',steps:[{id:'pre1',title:'화장품 vs 의약부외품 분류',desc:'효능 표방 정도에 따라 화장품·의약부외품·의약품으로 분류.',docs:['분류 근거'],agency:'자체',time:'1주',detail:{주요내용:['화장품: 청결·미화 목적','의약부외품: 제한적 효능 허용 (미백·주름 등)','기준 초과 효능 표방 시 의약품으로 분류'],필요서류:['성분 목록·함량'],주의사항:['의약부외품은 별도 허가 필요']},importance:'critical',ai_q:'일본 화장품·의약부외품·의약품 분류 기준과 미백·주름 기능 표방 시 적용 규정을 설명해줘'}]},{id:'doc',name:'B. 허가 자료',steps:[{id:'doc1',title:'제조판매업 허가 취득',desc:'화장품을 판매하려면 제조판매업 허가 필수.',docs:['製造販売業許可証'],agency:'都道府県',time:'1~3개월',detail:{주요내용:['総括製造販売責任者 선임','品質保証部門·安全管理部門 설치','GQP·GVP 준수'],필요서류:['허가 신청서','시설 도면','책임자 자격 증명'],주의사항:['외국 기업은 일본 내 허가 업체 통해 판매']},importance:'critical',ai_q:'일본 화장품 製造販売業 허가 요건과 GQP·GVP 기준을 설명해줘'}]},{id:'submit',name:'C. 신고·허가',steps:[{id:'sub1',title:'화장품 성분 사전 확인 및 신고',desc:'배합 허용 성분만 사용. 포지티브 리스트 기반.',docs:['성분 확인서'],agency:'자체·都道府県',time:'2~4주',detail:{주요내용:['화장품 배합 성분 기준 확인','금지·제한 성분 확인','의약부외품은 별도 허가 신청'],필요서류:['전성분 목록','함량 자료'],주의사항:['포지티브 리스트에 없는 성분은 원칙적 사용 불가']},importance:'critical',ai_q:'일본 화장품 성분 포지티브 리스트 제도와 사용 금지·제한 성분 기준을 설명해줘'}]},{id:'approve',name:'D. 판매 개시',steps:[{id:'app1',title:'라벨 기준 준수 및 판매 개시',desc:'약사법 및 화장품 표시 지침 준수.',docs:['최종 라벨'],agency:'자체',time:'1주',detail:{주요내용:['製造販売業者명','全成分 표시','내용량·로트번호','사용기한 또는 개봉 후 사용 기간'],필요서류:['최종 라벨 시안'],주의사항:['전성분 표시 의무 (2001년 이후 전품목)']},ai_q:'일본 화장품 라벨 필수 기재 사항과 전성분 표시 기준을 설명해줘'}]}]},
+    cn:{title:'화장품 중국(NMPA) 등록',agency:'国家药品监督管理局 (NMPA)',total_time:'3개월~2년',phases:[{id:'pre',name:'A. 분류 확인',steps:[{id:'pre1',title:'특수화장품 vs 일반화장품',desc:'특수화장품(染发·防晒·祛斑 등)은 注册, 일반은 备案.',docs:['분류 확인서'],agency:'NMPA',time:'1주',detail:{주요내용:['특수화장품 9종 (염모·탈색·파마·제취·비듬제거·두발촉진·미백·주름·자외선차단)','일반화장품: 备案 (간소화 절차)','특수화장품: 注册 (심사 필요)'],필요서류:['제품 성분 목록'],주의사항:['특수화장품 미신고 판매 시 대량 적발·벌금']},importance:'critical',ai_q:'중국 화장품 특수화장품과 일반화장품 분류 기준과 각 절차를 설명해줘'}]},{id:'doc',name:'B. 등록 자료',steps:[{id:'doc1',title:'안전성 평가 자료 준비',desc:'화장품 안전기술규범(2021) 기준.',docs:['安全评估报告'],agency:'자체',time:'1~3개월',detail:{주요내용:['성분 안전성 평가','독성 자료','원료 정보 공개'],필요서류:['安全评估报告','原料信息','产品标签样稿'],주의사항:['중국 특유 성분 제한 기준 별도 확인 필수']},importance:'critical',ai_q:'중국 화장품 안전기술규범(2021)의 성분 제한 기준과 安全评估报告 요건을 설명해줘'}]},{id:'submit',name:'C. 备案/注册',steps:[{id:'sub1',title:'NMPA 备案 또는 注册 신청',desc:'일반화장품은 备案(온라인), 특수는 注册(심사).',docs:['备案/注册 확인서'],agency:'NMPA',time:'备案: 즉시 / 注册: 3~12개월',detail:{주요내容:['国产普通化妆品: 省级药监局 备案','进口普通化妆品: NMPA 备案','特殊化妆品: NMPA 注册'],필요서류:['注册/备案 자료 전체','进口화장품 위생허가증 (구분)'],주의사항:['备案 완료 즉시 판매 가능, 注册는 승인 후']},importance:'critical',ai_q:'중국 화장품 进口 备案 절차와 특수화장품 注册 신청 요건을 설명해줘'}]},{id:'approve',name:'D. 备案/注册 완료',steps:[{id:'app1',title:'备案号/注册证 취득 및 판매',desc:'备案号 또는 注册证 취득 후 중국 내 판매 가능.',docs:['备案号/注册证'],agency:'NMPA',time:'발급',detail:{주요내용:['라벨 备案号/注册号 표시','중국어 라벨 의무','원료 목록 공개'],필요서류:['없음'],주의사항:['5년마다 注册 갱신 필요']},importance:'critical',ai_q:'중국 화장품 备案号 취득 후 라벨 표시 의무와 갱신 절차를 설명해줘'}]}]}
+  },
+  food:{
+    kr:{title:'식품 한국(MFDS) 수입·허가',agency:'식품의약품안전처 (MFDS)',total_time:'1개월~1년',phases:[{id:'pre',name:'A. 식품 분류 및 원료 확인',steps:[{id:'pre1',title:'식품 유형 및 원료 확인',desc:'식품공전 기준 식품 유형 확인. 금지 원료·수입 금지 식품 여부 확인.',docs:['식품공전 검토서'],agency:'MFDS',time:'1~2주',detail:{주요내용:['식품공전 식품 유형 확인','수입 금지 국가·품목 확인','방사능 검사 대상 여부 확인','유전자변형(GMO) 해당 여부'],필요서류:['제품 성분표','원산지 정보'],주의사항:['수입 금지 식품 신고 시 즉시 반송·폐기']},importance:'critical',ai_q:'한국 식품공전 식품 유형 분류와 수입 금지 품목 기준을 설명해줘'},{id:'pre2',title:'건강기능식품 해당 여부 확인',desc:'기능성 표방 시 건강기능식품법 적용. 일반식품과 규제 완전 상이.',docs:['분류 근거'],agency:'MFDS',time:'1주',detail:{주요내용:['기능성 표방 여부 판단','건강기능식품 공전 원료 인정 여부','신소재식품(새로운 식품원료) 해당 여부'],필요서류:['제품 설명서','기능성 표시 내용'],주의사항:['일반식품에 기능성 표방 시 불법']},importance:'critical',ai_q:'한국 건강기능식품과 일반식품의 차이, 기능성 표방 기준을 설명해줘'}]},{id:'doc',name:'B. 수입 신고 서류 준비',steps:[{id:'doc1',title:'수입 신고 서류 준비',desc:'수입식품안전관리특별법 기준 제출 서류 준비.',docs:['수입신고서','시험성적서','원산지증명서'],agency:'자체',time:'1~2주',detail:{주요내용:['시험성적서: MFDS 인정 기관 발행','원산지증명서 (C/O)','제조공정서','라벨 시안 (한글 표시 기준)'],필요서류:['수입신고서','영문 시험성적서','원산지 증명서','제조공정 설명서','한글 라벨 시안'],주의사항:['유해물질 기준 초과 시 통관 거부']},importance:'critical',ai_q:'한국 수입식품 수입신고 필수 서류 목록과 시험성적서 기준을 설명해줘'},{id:'doc2',title:'한글 라벨 작성',desc:'식품 등의 표시기준 고시 준수. 영양성분 표시 의무.',docs:['한글 라벨'],agency:'자체',time:'1~2주',detail:{주요내용:['제품명·유형·내용량','원재료명·함량','영양성분 표시 (의무 대상)','유통기한·제조일자','보관방법·주의사항','수입자 정보'],필요서류:['최종 한글 라벨 시안'],주의사항:['알레르기 성분 미표시 시 회수·폐기']},importance:'critical',ai_q:'한국 식품 한글 표시 기준과 영양성분 의무 표시 대상을 설명해줘'}]},{id:'submit',name:'C. 수입 신고 및 검사',steps:[{id:'sub1',title:'수입식품 신고 (식품안전나라)',desc:'식품안전나라 시스템 온라인 신고.',docs:['신고 확인서'],agency:'식품의약품안전처',time:'신고일',detail:{주요내용:['수입식품 통합정보시스템 신고','검사 유형 결정 (서류·관능·정밀)','수수료 납부'],필요서류:['서류 일체'],주의사항:['최초 수입품은 정밀검사 대상']},importance:'critical',ai_q:'한국 수입식품 신고 절차와 검사 유형(서류·관능·정밀)의 차이를 설명해줘'},{id:'sub2',title:'통관 검사 통과',desc:'검사 결과 적합 시 통관. 부적합 시 반송·폐기·기준 완화 신청.',docs:['검사 결과서'],agency:'식품의약품안전처',time:'3~30일',detail:{주요내용:['서류 검사: 즉시','관능 검사: 1~3일','정밀 검사: 7~30일','검사명령 품목 별도 관리'],필요서류:['추가 시험성적서 (요청 시)'],주의사항:['부적합 시 반송 비용 수입자 부담']},importance:'critical',ai_q:'한국 수입식품 통관 검사 유형별 기간과 부적합 시 대응 절차를 설명해줘'}]},{id:'approve',name:'D. 통관 완료 및 유통',steps:[{id:'app1',title:'영업 신고 및 유통',desc:'식품판매업·수입판매업 영업 신고 후 유통.',docs:['영업신고증'],agency:'지자체',time:'1~2주',detail:{주요내용:['수입판매업 영업 신고 (지자체)','HACCP 적용 의무 여부 확인','유통기한 설정 근거 보유'],필요서류:['영업신고 서류'],주의사항:['HACCP 의무 업종은 인증 취득 후 유통']},ai_q:'한국 수입식품 판매를 위한 영업 신고 절차와 HACCP 의무 대상 업종을 설명해줘'}]}]},
+    us:{title:'식품 미국(FDA) 등록·수출',agency:'FDA CFSAN',total_time:'1~3개월',phases:[{id:'pre',name:'A. FSMA 이해',steps:[{id:'pre1',title:'FSMA 의무 사항 파악',desc:'Foreign Supplier Verification Program(FSVP) 및 시설 등록 의무.',docs:['FSMA 체크리스트'],agency:'FDA',time:'1주',detail:{주요내용:['Food Facility Registration (2년 갱신)','FSVP: 미국 수입업자의 외국 공급업체 검증','HARPC: 예방 통제 계획 수립 의무','Produce Safety Rule: 신선 농산물'],필요서류:['없음 (이해 단계)'],주의사항:['FSVP 미준수 시 통관 거부']},importance:'critical',ai_q:'FDA FSMA 주요 의무사항(FSVP·HARPC)과 외국 식품 제조사 의무를 설명해줘'}]},{id:'doc',name:'B. 등록 및 서류',steps:[{id:'doc1',title:'FDA 식품 시설 등록',desc:'bioterrorism act 기준. 미국 수출 전 의무 등록.',docs:['등록 확인서'],agency:'FDA',time:'1주',detail:{주요내용:['FDA Food Facility Registration System','2년마다 갱신','Prior Notice 수입 전 제출'],필요서류:['없음 (온라인 직접)'],주의사항:['미등록 시설 제품은 통관 자동 차단']},importance:'critical',ai_q:'FDA 식품 시설 등록(FFR) 절차와 Prior Notice 요건을 설명해줘'},{id:'doc2',title:'라벨 (FDA 21 CFR 101)',desc:'영양성분표·성분명·알레르기 표시 기준 준수.',docs:['미국 라벨 시안'],agency:'자체',time:'2~4주',detail:{주요내용:['Nutrition Facts Panel','Ingredient List','Allergen Declaration (9대 알레르기)','Net Quantity·Manufacturer Info'],필요서류:['최종 라벨 시안'],주의사항:['FALCPA 알레르기 미표시 시 리콜 명령']},importance:'critical',ai_q:'FDA 21 CFR 101 식품 라벨 요건과 9대 알레르기 표시 기준을 설명해줘'}]},{id:'submit',name:'C. Prior Notice 및 통관',steps:[{id:'sub1',title:'Prior Notice 제출',desc:'미국 도착 전 FDA에 사전 통보 의무.',docs:['Prior Notice 확인서'],agency:'FDA',time:'수입 2~5일 전',detail:{주요내용:['FDA PN System 온라인 제출','상품·수입업자·공급업자 정보 입력','PN Confirmation Number 수령'],필요서류:['제품 정보','공급업자 정보'],주의사항:['PN 미제출 시 통관 거부·억류']},importance:'critical',ai_q:'FDA Prior Notice 제출 절차와 제출 기한을 설명해줘'}]},{id:'approve',name:'D. 통관 완료',steps:[{id:'app1',title:'FDA Entry Review 통과',desc:'FDA May Proceed 통보 후 통관 완료.',docs:['통관 확인서'],agency:'FDA·CBP',time:'즉시~30일',detail:{주요내용:['서류 검토·샘플링 가능','수입 경보(Import Alert) 확인','FDA May Proceed = 통관 허가'],필요서류:['추가 자료 (요청 시)'],주의사항:['Import Alert 등재 제조소 제품은 자동 차단']},importance:'critical',ai_q:'FDA 식품 Import Alert 제도와 통관 거부 시 대응 방법을 설명해줘'}]}]},
+    eu:{title:'식품 유럽 Novel Food/일반 수출',agency:'EFSA / European Commission',total_time:'1개월~3.5년',phases:[{id:'pre',name:'A. Novel Food 여부 확인',steps:[{id:'pre1',title:'Novel Food 해당 여부 판단',desc:'EU에서 1997년 이전 의미 있는 소비 이력 없으면 Novel Food.',docs:['Novel Food 여부 분석서'],agency:'EU Novel Food Catalogue',time:'2~4주',detail:{주요내용:['EU Novel Food Catalogue 검색','1997년 5월 15일 이전 소비 이력 검토','Novel Food 해당 시 수권 필수'],필요서류:['이력 자료'],주의사항:['Novel Food 미승인 판매 시 즉시 판매 금지']},importance:'critical',ai_q:'EU Novel Food 규정(2015/2283) 적용 기준과 Novel Food 판단 절차를 설명해줘'}]},{id:'doc',name:'B. 일반식품 또는 Novel Food',steps:[{id:'doc1',title:'일반식품: 위생·라벨 요건 준수',desc:'EU 식품위생규정 852/2004 및 라벨 규정 1169/2011 준수.',docs:['EU 라벨','위생 자료'],agency:'자체',time:'2~4주',detail:{주요내용:['14대 알레르기 표시','영양 성분 표시 의무','원산지 표시','위생 등록 (식품업체)'],필요서류:['EU 규격 라벨','HACCP 인증 자료'],주의사항:['EU 내 책임 있는 식품업체 (FBO) 지정 필요']},importance:'important',ai_q:'EU 식품 정보 규정 1169/2011 라벨 요건과 14대 알레르기 표시 기준을 설명해줘'},{id:'doc2',title:'Novel Food: 안전성 평가 자료',desc:'EFSA에 안전성 평가 신청. 매우 장기 절차.',docs:['Novel Food 신청서','안전성 자료'],agency:'EFSA',time:'1~3.5년',detail:{주요내용:['Application to EC → EFSA 평가','안전성 평가 (독성·영양·알레르기)','EC 수권 결정 (Implementing Act)'],필요서류:['Novel Food Application Dossier'],주의사항:['평균 3.5년 소요. 승인 보장 아님']},ai_q:'EU Novel Food 안전성 평가 절차와 EFSA 심사 기간을 설명해줘'}]},{id:'submit',name:'C. 시장 출시',steps:[{id:'sub1',name:'EU 내 FBO 등록 및 유통',title:'EU 내 Food Business Operator 등록',desc:'EU 내 FBO 지정 및 관할 당국 등록.',docs:['FBO 등록 확인'],agency:'EU 회원국 당국',time:'2~4주',detail:{주요내용:['EU 내 법인 또는 수입업자 지정','회원국 food authority에 시설 등록','RASFF 모니터링 대응 체계 구축'],필요서류:['사업자 정보'],주의사항:['FBO 없으면 EU 내 유통 불가']},importance:'critical',ai_q:'EU 식품 수출을 위한 FBO 등록 절차와 RASFF 대응 방법을 설명해줘'}]},{id:'approve',name:'D. 판매 개시',steps:[{id:'app1',title:'EU 시장 출시',desc:'모든 요건 충족 후 EU 27개국 판매 가능.',docs:['최종 확인 체크리스트'],agency:'자체',time:'즉시',detail:{주요내용:['EFSA/EC 수권 확인','라벨 최종 확인','RASFF 대응 체계 운영'],필요서류:['없음'],주의사항:['제품 안전 문제 발생 시 72시간 내 당국 통보 의무']},ai_q:'EU 식품 시장 출시 후 RASFF 신고 의무와 제품 리콜 절차를 설명해줘'}]}]},
+    jp:{title:'식품 일본 수입 신고',agency:'厚生労働省 / 検疫所',total_time:'1~3개월',phases:[{id:'pre',name:'A. 수입 요건 확인',steps:[{id:'pre1',title:'식품위생법 적용 요건 확인',desc:'일본 식품위생법 기준 성분·농약 잔류 기준 확인.',docs:['성분 규격 확인서'],agency:'厚生労働省',time:'1~2주',detail:{주요내용:['포지티브 리스트 제도 (농약 잔류)','첨가물 지정 제도 확인','방사성 물질 기준 적용 여부'],필요서류:['성분 목록','원산지 정보'],주의사항:['포지티브 리스트 미등재 농약 잔류 시 통관 거부']},importance:'critical',ai_q:'일본 식품 수입 포지티브 리스트 제도와 농약 잔류 기준을 설명해줘'}]},{id:'doc',name:'B. 수입 신고 서류',steps:[{id:'doc1',title:'食品等輸入届出書 준비',desc:'후생노동성 검역소 제출 서류 준비.',docs:['輸入届出書','試験成績書'],agency:'厚生労働省 検疫所',time:'1~2주',detail:{주요내용:['食品等輸入届出書 양식 작성','시험성적서 (일본어 또는 영어)','제조공정서','원산지 증명서','성분 규격 적합 확인서'],필요서류:['輸入届出書','試験成績書','製造工程書','産地証明書'],주의사항:['서류 불비 시 검사 명령 발동']},importance:'critical',ai_q:'일본 食品等輸入届出 제출 서류 목록과 검역소 신고 절차를 설명해줘'}]},{id:'submit',name:'C. 검역소 신고',steps:[{id:'sub1',title:'検疫所 수입 신고 및 검사',desc:'FAINS 시스템 온라인 신고 또는 창구 신고.',docs:['신고 수리 통지서'],agency:'検疫所',time:'3~30일',detail:{주요내용:['FAINS 시스템 온라인 신고','서류 검사·모니터링 검사·명령 검사','검사 합격 시 수입신고수리통지서'],필요서류:['신고서 일체'],주의사항:['명령 검사 대상 품목은 전수 검사 적용']},importance:'critical',ai_q:'일본 식품 검역소 수입 신고 절차와 모니터링 검사·명령 검사 대상을 설명해줘'}]},{id:'approve',name:'D. 통관 완료',steps:[{id:'app1',title:'수입 허가 및 유통',desc:'수입신고수리 후 세관 통관 완료. 일본 내 유통 가능.',docs:['輸入許可証'],agency:'税関',time:'즉시',detail:{주요내용:['세관 수입 신고 완료','일본어 라벨 부착','보관·유통 기준 준수'],필요서류:['수입신고수리통지서'],주의사항:['일본어 라벨 의무 — 라벨 미부착 시 유통 불가']},importance:'critical',ai_q:'일본 수입 식품 일본어 라벨 표시 의무 사항과 표시 기준을 설명해줘'}]}]},
+    cn:{title:'식품 중국(SAMR/GACC) 수출',agency:'GACC / 市场监管总局',total_time:'3개월~2년',phases:[{id:'pre',name:'A. 수출 요건 파악',steps:[{id:'pre1',title:'GACC 등록 의무 확인',desc:'중국 수출 식품 제조업체 GACC 등록 필수.',docs:['GACC 등록 체크리스트'],agency:'GACC',time:'1~2주',detail:{주요내용:['식품 제조업체 GACC 등록 의무 (2022년 이후 전품목)','카테고리별 등록 요건 상이','수출국 정부 추천 방식'],필요서류:['회사 정보','제조 현황'],주의사항:['GACC 미등록 업체 제품은 중국 통관 차단']},importance:'critical',ai_q:'중국 GACC 식품 수출업체 등록 제도와 등록 절차를 설명해줘'}]},{id:'doc',name:'B. 위생 증명 및 라벨',steps:[{id:'doc1',title:'위생증명서 (Health Certificate)',desc:'수출국 정부 발행 위생증명서 필수.',docs:['위생증명서'],agency:'수출국 정부 기관',time:'1~4주',detail:{주요내용:['수출국 관할 당국 발행 위생증명서','GACC 인정 수출국·당국 확인','중문 번역 첨부'],필요서류:['위생증명서 (Sanitary Certificate)'],주의사항:['인정되지 않은 국가·당국 발행은 무효']},importance:'critical',ai_q:'중국 수출 식품 위생증명서 요건과 GACC 인정 발행 기관을 설명해줘'},{id:'doc2',title:'중국어 라벨 (预包装食品标签)',desc:'GB 7718 기준 중국어 라벨 필수.',docs:['中文 라벨'],agency:'자체',time:'2~4주',detail:{주요내용:['GB 7718: 预包装食品标签通则','食品名称·配料表·净含量','生产日期·保质期','进口商·经销商 정보'],필요서류:['최종 中文 라벨'],주의사항:['중국어 라벨 없이 유통 시 불합격 처리']},importance:'critical',ai_q:'중국 GB 7718 식품 라벨 기준과 进口食品 라벨 특수 요건을 설명해줘'}]},{id:'submit',name:'C. 통관 신고',steps:[{id:'sub1',title:'海关 통관 신고',desc:'중국 海关(세관) 수입 신고 및 검역.',docs:['통관 신고서'],agency:'中国海关',time:'1~4주',detail:{주요내용:['GACC 등록번호 신고','位生证书 제출','抽检 (샘플 검사) 가능성','标签 심사'],필요서류:['海关 报关单','위생증명서','中文 라벨'],주의사항:['검사 명령 대상 품목은 전수 검사 적용']},importance:'critical',ai_q:'중국 식품 수입 통관 신고 절차와 海关 검역 기준을 설명해줘'}]},{id:'approve',name:'D. 통관 완료 및 유통',steps:[{id:'app1',title:'통관 완료 및 중국 내 유통',desc:'통관 완료 후 중국 내 유통 가능.',docs:['通关单'],agency:'中国海关',time:'발급',detail:{주요내용:['通关单 수령','유통업체 전달','보관·운반 기준 준수'],필요서류:['없음'],주의사항:['식품 안전 문제 발생 시 즉시 리콜 명령 가능']},importance:'critical',ai_q:'중국 식품 통관 완료 후 유통 관리 의무와 리콜 절차를 설명해줘'}]}]}
+  }
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let selectedCat = null, selectedCountry = null;
+let checked = {};
+let aiHistory = [];
+
+// ─────────────────────────────────────────────
+// SELECTOR
+// ─────────────────────────────────────────────
+document.querySelectorAll('#cat-btns .sel-btn').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#cat-btns .sel-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    selectedCat=b.dataset.cat;
+    renderWorkflow();
+  };
+});
+document.querySelectorAll('#country-btns .sel-btn').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#country-btns .sel-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    selectedCountry=b.dataset.country;
+    renderWorkflow();
+  };
+});
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function getKey(stepId){ return `${selectedCat}_${selectedCountry}_${stepId}`; }
+
+function renderWorkflow(){
+  if(!selectedCat||!selectedCountry) return;
+  const wf = WF[selectedCat]?.[selectedCountry];
+  if(!wf){ document.getElementById('content').innerHTML='<div class="empty-state"><div class="empty-icon">🚧</div><div class="empty-title">준비 중</div><p class="empty-desc">해당 국가/분야 워크플로우를 준비 중입니다.</p></div>'; document.getElementById('sidebar').innerHTML=''; document.getElementById('progress-wrap').style.display='none'; return; }
+
+  // Progress
+  let totalSteps=0, doneSteps=0;
+  wf.phases.forEach(ph=>ph.steps.flat().forEach(s=>{ totalSteps++; if(checked[getKey(s.id)]) doneSteps++; }));
+  document.getElementById('progress-wrap').style.display='flex';
+  const pct=totalSteps?Math.round(doneSteps/totalSteps*100):0;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-pct').textContent=pct+'%';
+  document.getElementById('progress-stats').textContent=`${doneSteps} / ${totalSteps} 단계 완료`;
+
+  // Sidebar
+  const sb=document.getElementById('sidebar');
+  sb.innerHTML=`<div style="padding:12px 20px 6px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-weight:500;">${wf.title}</div>
+  <div style="padding:4px 20px 12px;font-size:11px;color:var(--gray2);">⏱ 예상 기간: ${wf.total_time}</div>`;
+  wf.phases.forEach((ph,pi)=>{
+    const phDone=ph.steps.flat().every(s=>checked[getKey(s.id)]);
+    const g=document.createElement('div');g.className='phase-group';
+    const h=document.createElement('div');h.className='phase-header'+(phDone?' done':'');
+    const dot=document.createElement('div');dot.className='phase-dot'+(phDone?' done':'');
+    const nm=document.createElement('div');nm.className='phase-name';nm.textContent=ph.name;
+    const cnt=document.createElement('div');cnt.className='phase-count';cnt.textContent=ph.steps.flat().length;
+    h.appendChild(dot);h.appendChild(nm);h.appendChild(cnt);
+    h.onclick=()=>{ const el=document.getElementById('phase-'+ph.id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); };
+    g.appendChild(h);
+    const sl=document.createElement('div');sl.className='phase-steps';
+    ph.steps.flat().forEach(s=>{
+      const ss=document.createElement('div');ss.className='side-step'+(checked[getKey(s.id)]?' done':'');
+      ss.textContent=s.title;
+      if(checked[getKey(s.id)]) ss.classList.add('done');
+      ss.onclick=()=>{ const el=document.getElementById('step-'+s.id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); };
+      sl.appendChild(ss);
+    });
+    g.appendChild(sl);
+    sb.appendChild(g);
+  });
+
+  // Content
+  const ct=document.getElementById('content');
+  ct.innerHTML='';
+  wf.phases.forEach(ph=>{
+    const sec=document.createElement('div');sec.className='phase-section';sec.id='phase-'+ph.id;
+    sec.innerHTML=`<div class="phase-title-row"><span class="phase-badge">Phase</span><div><div class="phase-title">${ph.name}</div></div></div><div class="steps-list" id="steps-${ph.id}"></div>`;
+    const list=sec.querySelector(`#steps-${ph.id}`);
+    ph.steps.flat().forEach((s,si)=>{
+      const card=document.createElement('div');card.className='step-card'+(checked[getKey(s.id)]?' done-card':'');card.id='step-'+s.id;
+      const imp=s.importance==='critical'?'<span class="imp-critical">핵심</span>':s.importance==='important'?'<span class="imp-important">중요</span>':'';
+      const meta=`
+        ${s.agency?`<span class="meta-tag tag-agency">🏛 ${s.agency}</span>`:''}
+        ${s.time?`<span class="meta-tag tag-time">⏱ ${s.time}</span>`:''}
+        ${(s.docs||[]).slice(0,2).map(d=>`<span class="meta-tag tag-doc">📄 ${d}</span>`).join('')}
+      `;
+      card.innerHTML=`<div class="step-main">
+        <div class="step-check${checked[getKey(s.id)]?' checked':''}" onclick="toggleCheck('${s.id}',this)"></div>
+        <div class="step-num">STEP ${si+1}</div>
+        <div class="step-body">
+          <div class="step-title">${s.title} ${imp}</div>
+          <div class="step-desc">${s.desc}</div>
+          <div class="step-meta">${meta}</div>
+          ${s.detail?`<button class="step-expand-btn" onclick="toggleDetail('${s.id}',this)">▼ 상세 보기</button>`:''}
+        </div>
+      </div>
+      ${s.detail?`<div class="step-detail" id="detail-${s.id}">
+        <div class="detail-grid">
+          ${s.detail['주요내용']?`<div class="detail-box"><div class="detail-box-title">주요 내용</div><ul>${s.detail['주요내용'].map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
+          ${s.detail['필요서류']?`<div class="detail-box"><div class="detail-box-title">필요 서류</div><ul>${s.detail['필요서류'].map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
+          ${s.detail['주의사항']?`<div class="detail-box"><div class="detail-box-title">⚠️ 주의사항</div><ul>${s.detail['주의사항'].map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
+        </div>
+        ${s.ai_q?`<button class="ai-ask-btn" onclick="askAI('${s.ai_q.replace(/'/g,"\\'")}','${s.title.replace(/'/g,"\\'")}')">✦ AI에게 이 단계 상세 질문하기 ↗</button>`:''}
+      </div>`:''}`;
+      list.appendChild(card);
+    });
+    ct.appendChild(sec);
+  });
+
+  // Completion
+  const cb=document.getElementById('completion-banner');
+  cb.classList.toggle('show', doneSteps===totalSteps&&totalSteps>0);
+  ct.appendChild(cb);
+}
+
+function toggleCheck(stepId, el){
+  event.stopPropagation();
+  const key=getKey(stepId);
+  checked[key]=!checked[key];
+  el.classList.toggle('checked',checked[key]);
+  const card=document.getElementById('step-'+stepId);
+  if(card) card.classList.toggle('done-card',checked[key]);
+  const ss=document.querySelector(`.side-step[onclick*="${stepId}"]`);
+  if(ss) ss.classList.toggle('done',checked[key]);
+  // Update progress
+  if(!selectedCat||!selectedCountry) return;
+  const wf=WF[selectedCat]?.[selectedCountry];
+  let t=0,d=0;
+  wf.phases.forEach(ph=>ph.steps.flat().forEach(s=>{t++;if(checked[getKey(s.id)])d++;}));
+  const pct=t?Math.round(d/t*100):0;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-pct').textContent=pct+'%';
+  document.getElementById('progress-stats').textContent=`${d} / ${t} 단계 완료`;
+  const cb=document.getElementById('completion-banner');
+  cb.classList.toggle('show',d===t&&t>0);
+}
+
+function toggleDetail(stepId, btn){
+  event.stopPropagation();
+  const det=document.getElementById('detail-'+stepId);
+  if(!det) return;
+  const open=det.classList.toggle('open');
+  btn.textContent=open?'▲ 닫기':'▼ 상세 보기';
+}
+
+// ─────────────────────────────────────────────
+// AI PANEL
+// ─────────────────────────────────────────────
+function toggleAI(){ document.getElementById('ai-panel').classList.toggle('open'); }
+
+function askAI(q, stepTitle){
+  const panel=document.getElementById('ai-panel');
+  panel.classList.add('open');
+  document.getElementById('ai-inp').value=q;
+  sendAI();
+}
+
+async function sendAI(){
+  const inp=document.getElementById('ai-inp');
+  const text=inp.value.trim();
+  if(!text) return;
+  addAIMsg('user',`<span style="padding:6px 9px;display:block;">${text}</span>`);
+  aiHistory.push({role:'user',content:text});
+  inp.value='';
+  const send=document.getElementById('ai-send');
+  send.disabled=true;
+  const typing=document.getElementById('ai-typing');
+  const msgs=document.getElementById('ai-msgs');
+  msgs.appendChild(typing);typing.classList.add('on');
+  msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const catName=selectedCat?{medical:'의료기기',pharma:'의약품',cosmetic:'화장품',food:'식품'}[selectedCat]:'전체';
+    const countryName=selectedCountry?{kr:'한국(MFDS)',us:'미국(FDA)',eu:'유럽(EMA/CE)',jp:'일본(PMDA)',cn:'중국(NMPA)'}[selectedCountry]:'전체';
+    const system=`You are GlobalAIReg at www.globalregai.info. Answer in Korean.
+Current workflow context: ${catName} — ${countryName} 허가 절차.
+Answer ONLY based on official regulatory documents (MFDS, FDA, EMA, WHO, ICH, ISO, PMDA, NMPA).
+Rules: [1] Official doc facts only. [2] Practical interpretation with citations. [3] Uncertain areas + next steps.
+JSON only — no markdown:
+{"sections":[{"type":"official","title":"[1] 공식 문서 근거","body":"..."},{"type":"analysis","title":"[2] 실무 적용","body":"..."},{"type":"uncertainty","title":"[3] 추가 확인 사항","body":"..."}],"sources":[{"agency":"MFDS","doc":"문서명","section":"조항","date":"YYYY-MM","status":"current"}],"disclaimer":"..."}`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages:aiHistory})});
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'{}';
+    aiHistory.push({role:'assistant',content:raw});
+    typing.classList.remove('on');
+    renderAIBub(raw);
+  }catch(e){ typing.classList.remove('on'); addAIMsg('ai','<span style="color:#e74c3c;">⚠️ 오류 발생. 다시 시도해주세요.</span>'); }
+  send.disabled=false;
+}
+
+function addAIMsg(role,html){
+  const row=document.createElement('div');row.className='ai-msg '+role;
+  const av=document.createElement('div');av.className='ai-av';av.textContent=role==='ai'?'G':'U';
+  const bub=document.createElement('div');bub.className='ai-bub';bub.innerHTML=html;
+  row.appendChild(av);row.appendChild(bub);
+  const msgs=document.getElementById('ai-msgs');
+  msgs.appendChild(row);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function renderAIBub(raw){
+  let p;
+  try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+  catch(e){ addAIMsg('ai',`<span>${raw.replace(/\n/g,'<br>')}</span>`); return; }
+  const im={official:'ai1',analysis:'ai2',uncertainty:'ai3'};
+  const sm={official:'①',analysis:'②',uncertainty:'③'};
+  const row=document.createElement('div');row.className='ai-msg ai';
+  const av=document.createElement('div');av.className='ai-av';av.textContent='G';
+  const bub=document.createElement('div');bub.className='ai-bub';
+  (p.sections||[]).forEach(s=>{
+    const c=document.createElement('div');c.className='ai-sec-card';
+    c.innerHTML=`<div class="ai-sec-head"><div class="ai-sec-ic ${im[s.type]||'ai1'}">${sm[s.type]||'①'}</div><span class="ai-sec-ht">${s.title||''}</span></div><div class="ai-sec-body">${(s.body||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+    bub.appendChild(c);
+  });
+  if(p.sources?.length){
+    const sc=document.createElement('div');sc.className='ai-sec-card';
+    sc.innerHTML=`<div class="ai-sec-head"><div class="ai-sec-ic" style="background:rgba(31,78,121,.4);color:#5dade2;font-size:8px;">📎</div><span class="ai-sec-ht">출처</span></div>`;
+    const sl=document.createElement('div');sl.className='ai-src-list';
+    p.sources.forEach(s=>{
+      const si=document.createElement('div');si.className='ai-src';
+      const bc={'MFDS':'b-m','FDA':'b-f','EMA':'b-e'}[s.agency]||'b-w';
+      si.innerHTML=`<span class="ai-src-b ${bc}">${s.agency}</span><span><strong style="color:var(--white2);">${s.doc||''}</strong>${s.section?' · '+s.section:''}</span>`;
+      sl.appendChild(si);
+    });
+    sc.appendChild(sl);bub.appendChild(sc);
+  }
+  if(p.disclaimer){const d=document.createElement('div');d.className='ai-disc';d.textContent=p.disclaimer;bub.appendChild(d);}
+  row.appendChild(av);row.appendChild(bub);
+  const msgs=document.getElementById('ai-msgs');
+  msgs.appendChild(row);msgs.scrollTop=msgs.scrollHeight;
+}
+
+document.getElementById('ai-inp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAI();}
+});
+</script>
+</body>
+</html>

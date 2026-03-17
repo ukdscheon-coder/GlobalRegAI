@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlobalAIReg — 국제 GMP 규제 인텔리전스</title>
+<meta name="description" content="MFDS·FDA·EMA 공식 규제 문서 기반. 의료기기·의약품·식품·화장품 국제 GMP 규정 플랫폼.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,600;1,700&family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#080808;
+  --ink:#141414;
+  --ink2:#2A2A2A;
+  --white:#FFFFFF;
+  --off:#F7F6F3;
+  --off2:#F0EFE9;
+  --muted:#888;
+  --hint:#AAA;
+  --rule:#DDDDD8;
+  --rule2:#E8E8E4;
+  --green:#0D5C4A;
+  --green2:#0F7060;
+  --green3:#12876F;
+  --green-l:#E4F2EE;
+  --green-p:#F0FAF7;
+  --orange:#E85D1A;
+  --orange2:#F06A25;
+  --orange-l:#FEF0E8;
+  --gold:#7A5C1A;
+  --red:#C13030;
+  --blue:#1A3F8A;
+  --fd:'Cormorant Garamond',serif;
+  --fb:'Noto Sans KR',sans-serif;
+  --fc:'Bebas Neue',sans-serif;
+  --fm:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--white);color:var(--ink);font-family:var(--fb);line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+@keyframes lineIn{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.rev{opacity:0;transform:translateY(28px);transition:opacity .75s cubic-bezier(.25,.46,.45,.94),transform .75s cubic-bezier(.25,.46,.45,.94)}
+.rev.in{opacity:1;transform:none}
+.rev-d1{transition-delay:.1s}.rev-d2{transition-delay:.2s}.rev-d3{transition-delay:.3s}.rev-d4{transition-delay:.4s}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:58px;display:flex;align-items:center;padding:0 48px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--rule2);
+}
+.nav-logo{font-family:var(--fc);font-size:20px;letter-spacing:1.5px;color:var(--black);margin-right:auto}
+.nav-logo em{color:var(--green);font-style:normal}
+.nav-links{display:flex;gap:32px;font-size:12.5px;color:var(--muted);font-weight:400;letter-spacing:.01em}
+.nav-links a:hover{color:var(--black);transition:color .15s}
+.nav-right{display:flex;align-items:center;gap:14px;margin-left:36px}
+.lang-sw{display:flex;gap:1px;border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--off)}
+.lb{font-family:var(--fb);font-size:10.5px;padding:5px 9px;border:none;background:transparent;color:var(--hint);cursor:pointer;font-weight:500;transition:all .15s}
+.lb.on{background:var(--black);color:var(--white)}
+.lb:hover:not(.on){background:var(--rule2);color:var(--ink)}
+.nav-cta{font-size:12.5px;font-weight:500;padding:8px 20px;background:var(--green);color:var(--white);border-radius:4px;border:none;cursor:pointer;letter-spacing:.02em;transition:background .15s}
+.nav-cta:hover{background:var(--green2)}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  padding:0;overflow:hidden;position:relative;
+}
+.hero-left{
+  background:var(--black);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:90px 52px 60px;
+  position:relative;overflow:hidden;
+}
+.hero-left::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:rgba(13,92,74,.3);filter:blur(80px)}
+.hero-left::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--green),transparent)}
+.hero-eyebrow{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--green3);margin-bottom:28px;animation:fadeUp .9s ease both}
+.ey-line{width:32px;height:1px;background:var(--green3)}
+.hero-title{font-family:var(--fc);font-size:clamp(64px,8.5vw,120px);line-height:.88;letter-spacing:1px;color:var(--white);margin-bottom:0;animation:fadeUp .9s .12s ease both}
+.hero-title-italic{font-family:var(--fd);font-size:clamp(52px,6.5vw,92px);font-weight:700;font-style:italic;color:var(--green3);display:block;line-height:1;margin:4px 0 0;animation:fadeUp .9s .2s ease both}
+.hero-sub-word{font-family:var(--fb);font-size:13px;font-weight:300;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:20px;animation:fadeUp .9s .28s ease both}
+.hero-desc{font-size:15px;font-weight:300;color:rgba(255,255,255,.55);line-height:1.85;max-width:380px;margin-top:28px;margin-bottom:40px;animation:fadeUp .9s .36s ease both}
+.hero-desc strong{color:rgba(255,255,255,.85);font-weight:500}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .9s .44s ease both}
+.btn-white{display:inline-flex;align-items:center;gap:8px;background:var(--white);color:var(--black);font-family:var(--fb);font-size:13.5px;font-weight:500;padding:13px 26px;border-radius:4px;border:none;cursor:pointer;transition:all .2s;letter-spacing:.01em}
+.btn-white:hover{background:var(--off);transform:translateY(-1px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:rgba(255,255,255,.7);font-family:var(--fb);font-size:13.5px;font-weight:400;padding:13px 26px;border-radius:4px;border:1px solid rgba(255,255,255,.15);cursor:pointer;transition:all .2s}
+.btn-ghost:hover{border-color:rgba(255,255,255,.4);color:var(--white);transform:translateY(-1px)}
+
+/* HERO RIGHT */
+.hero-right{
+  background:var(--off);
+  display:flex;flex-direction:column;
+  padding:90px 52px 60px;
+  position:relative;
+  border-left:1px solid var(--rule);
+  animation:fadeUp .9s .15s ease both;
+}
+.hero-right::before{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:var(--orange-l);border-radius:0 0 0 200px}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin-bottom:20px;position:relative;z-index:1}
+.metric-cell{background:var(--white);padding:28px 22px;transition:background .2s}
+.metric-cell:hover{background:var(--green-p)}
+.m-num{font-family:var(--fc);font-size:44px;color:var(--black);line-height:1;margin-bottom:5px;letter-spacing:.5px}
+.m-num em{font-style:italic;color:var(--green);font-family:var(--fd);font-size:.7em}
+.m-label{font-size:11.5px;color:var(--muted);font-weight:400;letter-spacing:.02em}
+.hero-badge{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--black);border-radius:8px;font-size:12px;color:rgba(255,255,255,.6);position:relative;z-index:1}
+.badge-dot{width:7px;height:7px;border-radius:50%;background:var(--green3);animation:pulse 2.5s infinite;flex-shrink:0}
+
+/* MARQUEE */
+.marquee-wrap{background:var(--black);padding:12px 0;overflow:hidden;border-top:1px solid rgba(255,255,255,.06)}
+.marquee-track{display:flex;width:max-content;animation:mq 30s linear infinite}
+.m-item{display:flex;align-items:center;gap:6px;padding:0 28px;border-right:1px solid rgba(255,255,255,.08);font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);white-space:nowrap}
+.m-item em{color:var(--green3);font-style:normal}
+
+/* ── SECTION ── */
+.sec{padding:96px 48px;border-bottom:1px solid var(--rule)}
+.sec-dark{background:var(--black);border-bottom:1px solid rgba(255,255,255,.06)}
+.sec-off{background:var(--off)}
+.sec-green{background:var(--green);border-bottom:none}
+.eyebrow{display:flex;align-items:center;gap:14px;font-size:9.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--hint);margin-bottom:56px}
+.eyebrow::after{content:'';flex:1;height:1px;background:var(--rule2)}
+.eyebrow-dark{color:rgba(255,255,255,.2)}
+.eyebrow-dark::after{background:rgba(255,255,255,.07)}
+.eye-num{font-family:var(--fm);color:var(--rule);font-size:9px}
+.eye-num-dark{color:rgba(255,255,255,.15)}
+
+/* ── HOW ── */
+.how-header{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;margin-bottom:60px}
+.how-title{font-family:var(--fc);font-size:clamp(40px,5.5vw,72px);line-height:.92;letter-spacing:.5px;color:var(--black)}
+.how-title em{font-family:var(--fd);font-size:.8em;font-style:italic;color:var(--green);letter-spacing:-.02em}
+.how-desc{font-size:15px;color:var(--muted);line-height:1.85;font-weight:300;max-width:420px}
+.steps-list{display:flex;flex-direction:column;gap:0}
+.step-card{display:grid;grid-template-columns:72px 1fr 1.1fr;gap:44px;padding:36px 0;border-top:1px solid var(--rule2);align-items:start;transition:background .2s;cursor:default}
+.step-card:last-child{border-bottom:1px solid var(--rule2)}
+.step-card:hover{background:var(--off);margin:0 -20px;padding:36px 20px;border-radius:6px}
+.s-num{font-family:var(--fm);font-size:11px;color:var(--hint);padding-top:2px;letter-spacing:.05em}
+.s-left{}
+.s-tag{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:3px;margin-bottom:12px}
+.tag-g{background:var(--green-l);color:var(--green)}
+.tag-o{background:var(--orange-l);color:var(--orange)}
+.tag-r{background:#FAEAEA;color:var(--red)}
+.s-title{font-size:19px;font-weight:500;color:var(--black);line-height:1.3;letter-spacing:-.01em}
+.s-desc{font-size:14px;color:var(--muted);line-height:1.85;font-weight:300}
+
+/* ── CHAT SECTION ── */
+.chat-layout{display:grid;grid-template-columns:1fr 1.5fr;gap:68px;align-items:start}
+.chat-info-title{font-family:var(--fc);font-size:clamp(36px,4.5vw,60px);line-height:.92;letter-spacing:.5px;color:var(--white);margin-bottom:18px}
+.chat-info-title em{font-family:var(--fd);font-style:italic;color:var(--green3)}
+.chat-info-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.85;font-weight:300;margin-bottom:36px}
+.feat-list{display:flex;flex-direction:column;gap:0}
+.feat-row{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.feat-row:first-child{border-top:1px solid rgba(255,255,255,.07)}
+.feat-ico{width:36px;height:36px;border-radius:8px;background:rgba(13,92,74,.35);border:1px solid rgba(13,92,74,.4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
+.feat-tit{font-size:13.5px;font-weight:500;color:rgba(255,255,255,.85);margin-bottom:3px}
+.feat-dsc{font-size:12px;color:rgba(255,255,255,.35);line-height:1.6}
+
+/* CHAT BOX */
+.chat-box{background:var(--white);border:1px solid var(--rule);border-radius:14px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.12)}
+.cb-head{padding:13px 18px;border-bottom:1px solid var(--rule2);display:flex;align-items:center;gap:10px;background:var(--white)}
+.cb-logo{font-family:var(--fc);font-size:16px;letter-spacing:.5px;color:var(--black)}
+.cb-logo em{color:var(--green);font-style:normal}
+.cb-badge{margin-left:auto;font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px;font-weight:400}
+.cb-dot{width:6px;height:6px;border-radius:50%;background:var(--green3);animation:pulse 2.5s infinite}
+.cb-tabs{display:flex;border-bottom:1px solid var(--rule2);background:var(--off);overflow-x:auto}
+.cb-tab{font-family:var(--fb);font-size:12px;padding:9px 14px;color:var(--muted);border:none;background:transparent;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
+.cb-tab.on{color:var(--green);border-bottom-color:var(--green);background:var(--white)}
+.cb-tab:hover:not(.on){color:var(--black);background:var(--off2)}
+#chat-msgs{height:400px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--off)}
+#chat-msgs::-webkit-scrollbar{width:2px}
+#chat-msgs::-webkit-scrollbar-thumb{background:var(--rule)}
+.msg{display:flex;gap:10px;animation:fadeUp .22s ease}
+.msg.user{flex-direction:row-reverse}
+.av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.msg.ai .av{background:var(--green);color:var(--white);font-family:var(--fc);font-size:12px}
+.msg.user .av{background:var(--off2);color:var(--muted);border:1px solid var(--rule)}
+.bub{max-width:87%;font-size:13px;line-height:1.75}
+.msg.user .bub{background:var(--black);color:var(--white);padding:10px 14px;border-radius:13px 3px 13px 13px;font-weight:300}
+.msg.ai .bub{color:var(--ink)}
+.acard{border:1px solid var(--rule2);border-radius:7px;overflow:hidden;margin-bottom:5px;background:var(--white)}
+.ahead{display:flex;align-items:center;gap:7px;padding:6px 10px;border-bottom:1px solid var(--rule2);background:var(--off)}
+.aic{width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700;flex-shrink:0}
+.ic1{background:var(--green-l);color:var(--green)}
+.ic2{background:var(--orange-l);color:var(--orange)}
+.ic3{background:#FAEAEA;color:var(--red)}
+.ic-src{background:#EAF0FA;color:var(--blue)}
+.aht{font-size:9px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.abody{padding:9px 11px;font-size:12.5px;color:var(--ink2);line-height:1.75}
+.abody strong{font-weight:500;color:var(--black)}
+.src-rows{display:flex;flex-direction:column;gap:4px;padding:8px 10px}
+.src-row{display:flex;gap:7px;padding:5px 7px;background:var(--off);border-radius:4px;align-items:flex-start}
+.sb{font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;flex-shrink:0;margin-top:2px}
+.sbm{background:var(--green-l);color:var(--green)}
+.sbf{background:#FAEAEA;color:var(--red)}
+.sbe{background:#EAF0FA;color:var(--blue)}
+.sbw{background:#FDF6E3;color:var(--gold)}
+.src-info{font-size:11px;color:var(--muted);line-height:1.5}
+.src-info strong{color:var(--ink2);font-weight:400}
+.src-ok{color:var(--green);font-size:10px}
+.disc{font-size:10.5px;color:var(--hint);padding:6px 9px;border-left:2px solid var(--rule);margin-top:4px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.chip{font-family:var(--fb);font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--rule);color:var(--muted);background:var(--white);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--green);color:var(--green);background:var(--green-p)}
+#typing{display:none;align-items:center;gap:7px;font-size:12px;color:var(--muted);padding:2px 0 2px 38px}
+#typing.on{display:flex}
+.tdot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:bounce 1s infinite}
+.tdot:nth-child(2){animation-delay:.2s}.tdot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.65)}40%{transform:scale(1)}}
+.cb-inp{padding:11px 14px;border-top:1px solid var(--rule2);background:var(--white);display:flex;flex-direction:column;gap:7px}
+.inp-row{display:flex;gap:8px;align-items:flex-end}
+#chat-inp{flex:1;font-family:var(--fb);font-size:13px;padding:10px 13px;background:var(--off);border:1px solid var(--rule2);border-radius:7px;color:var(--black);outline:none;resize:none;min-height:40px;max-height:100px;line-height:1.55;transition:border .15s}
+#chat-inp:focus{border-color:var(--green)}
+#chat-inp::placeholder{color:var(--hint)}
+#send-btn{font-family:var(--fb);font-size:13px;font-weight:500;padding:0 18px;height:40px;background:var(--green);color:var(--white);border:none;border-radius:7px;cursor:pointer;transition:background .15s;white-space:nowrap;letter-spacing:.02em}
+#send-btn:hover{background:var(--green2)}
+#send-btn:disabled{opacity:.4;cursor:default}
+.inp-hint{font-size:10px;color:var(--hint);text-align:center;line-height:1.4}
+
+/* ── DOCS ── */
+.docs-header{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;margin-bottom:56px}
+.docs-title{font-family:var(--fc);font-size:clamp(36px,5vw,64px);line-height:.92;letter-spacing:.5px;color:var(--black)}
+.docs-title em{font-family:var(--fd);font-style:italic;color:var(--green)}
+.docs-sub{font-size:15px;color:var(--muted);line-height:1.85;font-weight:300}
+.docs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.doc-block{background:var(--white);padding:32px 28px;transition:background .2s}
+.doc-block:hover{background:var(--green-p)}
+.doc-head{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--rule2)}
+.doc-ico{width:40px;height:40px;border-radius:9px;background:var(--green-l);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.doc-cat{font-size:15px;font-weight:500;color:var(--black)}
+.doc-en{font-size:11px;color:var(--hint);margin-top:2px}
+.doc-countries{display:flex;flex-direction:column;gap:8px}
+.dc-row{display:flex;align-items:flex-start;gap:9px}
+.dc-flag{font-size:13px;flex-shrink:0;margin-top:3px}
+.dc-nm{font-size:12px;font-weight:500;color:var(--black);margin-bottom:4px}
+.dc-tags{display:flex;flex-wrap:wrap;gap:4px}
+.dc-tag{font-size:9.5px;padding:2px 8px;border-radius:3px;background:var(--off);border:1px solid var(--rule2);color:var(--muted);font-family:var(--fm)}
+.doc-btn{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:18px;padding:11px;border:1px solid rgba(13,92,74,.2);border-radius:7px;font-size:12px;color:var(--green);background:var(--green-p);cursor:pointer;font-family:var(--fb);transition:all .2s;width:100%;letter-spacing:.01em}
+.doc-btn:hover{background:var(--green-l);border-color:var(--green)}
+
+/* ── WF BANNER ── */
+.wf-banner{
+  background:var(--orange);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:28px 48px;cursor:pointer;
+  transition:background .2s;
+  text-decoration:none;
+}
+.wf-banner:hover{background:var(--orange2)}
+.wf-label{font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:5px;font-family:var(--fb)}
+.wf-title{font-family:var(--fc);font-size:22px;letter-spacing:.5px;color:var(--white)}
+.wf-arrow{font-size:28px;color:var(--white);transition:transform .2s}
+.wf-banner:hover .wf-arrow{transform:translateX(8px)}
+
+/* ── COVERAGE ── */
+.cov-header{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;margin-bottom:56px}
+.cov-title{font-family:var(--fc);font-size:clamp(36px,5vw,64px);line-height:.92;letter-spacing:.5px;color:var(--white)}
+.cov-title em{font-family:var(--fd);font-style:italic;color:var(--green3)}
+.cov-sub{font-size:15px;color:rgba(255,255,255,.4);line-height:1.85;font-weight:300}
+.cov-table{width:100%;border-collapse:collapse;font-size:13px}
+.cov-table th{text-align:left;padding:12px 16px;font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.07)}
+.cov-table td{padding:16px 16px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+.cov-table tr:last-child td{border-bottom:none}
+.cov-table tr:hover td{background:rgba(255,255,255,.03)}
+.cov-cat{display:flex;align-items:center;gap:10px;font-weight:500;color:rgba(255,255,255,.8);font-size:13px}
+.cov-regs{display:flex;flex-wrap:wrap;gap:6px}
+.cov-reg{font-size:10px;padding:3px 9px;border-radius:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-family:var(--fm)}
+
+/* ── PRINCIPLES ── */
+.prin-header{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;margin-bottom:56px}
+.prin-title{font-family:var(--fc);font-size:clamp(36px,5vw,64px);line-height:.92;letter-spacing:.5px;color:var(--black)}
+.prin-title em{font-family:var(--fd);font-style:italic;color:var(--green)}
+.prin-sub{font-size:15px;color:var(--muted);line-height:1.85;font-weight:300}
+.prin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.prin-cell{background:var(--white);padding:32px 24px;transition:background .2s}
+.prin-cell:hover{background:var(--green-p)}
+.prin-num{font-family:var(--fm);font-size:10px;color:var(--hint);margin-bottom:20px;letter-spacing:.1em}
+.prin-tit{font-size:15px;font-weight:500;color:var(--black);margin-bottom:10px;letter-spacing:-.01em}
+.prin-dsc{font-size:13px;color:var(--muted);line-height:1.8;font-weight:300}
+
+/* ── CTA ── */
+#cta{background:var(--green);padding:120px 48px;text-align:center;position:relative;overflow:hidden}
+#cta::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,.04)}
+.cta-inner{position:relative;z-index:1}
+.cta-eye{font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:22px}
+.cta-title{font-family:var(--fc);font-size:clamp(52px,8vw,104px);line-height:.9;letter-spacing:.5px;color:var(--white);margin-bottom:22px}
+.cta-title em{font-family:var(--fd);font-style:italic;color:rgba(255,255,255,.6)}
+.cta-sub{font-size:16px;color:rgba(255,255,255,.5);max-width:460px;margin:0 auto 44px;line-height:1.85;font-weight:300}
+.btn-cta-white{display:inline-flex;align-items:center;gap:8px;background:var(--white);color:var(--green);font-family:var(--fb);font-size:14px;font-weight:600;padding:15px 36px;border-radius:5px;border:none;cursor:pointer;transition:all .2s;letter-spacing:.02em}
+.btn-cta-white:hover{background:var(--off);transform:translateY(-2px)}
+
+/* ── FOOTER ── */
+footer{padding:36px 48px;background:var(--black);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.2);border-top:1px solid rgba(255,255,255,.05)}
+.f-logo{font-family:var(--fc);font-size:16px;letter-spacing:1px;color:rgba(255,255,255,.5)}
+.f-logo em{color:var(--green3);font-style:normal}
+.f-links{display:flex;gap:22px}
+.f-links a:hover{color:rgba(255,255,255,.5);transition:color .2s}
+
+@media(max-width:1100px){#hero{grid-template-columns:1fr}.hero-right{display:none}.chat-layout{grid-template-columns:1fr}.docs-header,.cov-header,.prin-header,.how-header{grid-template-columns:1fr;gap:24px}.step-card{grid-template-columns:48px 1fr}.s-desc{display:none}}
+@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.sec{padding:64px 20px}#hero .hero-left{padding:92px 24px 52px}.wf-banner{padding:20px 24px}.docs-grid,.prin-grid{grid-template-columns:1fr}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Global<em>AI</em>Reg</div>
+  <div class="nav-links">
+    <a href="#how" data-i18n="nav_how">작동 방식</a>
+    <a href="#chat-section" data-i18n="nav_chat">규정 상담</a>
+    <a href="workflow.html" data-i18n="nav_wf">A–Z 워크플로우</a>
+    <a href="#docs" data-i18n="nav_docs">허가 서류</a>
+    <a href="#coverage" data-i18n="nav_cov">규정 범위</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-sw">
+      <button class="lb on" data-lang="ko">KO</button>
+      <button class="lb" data-lang="en">EN</button>
+      <button class="lb" data-lang="ja">JA</button>
+      <button class="lb" data-lang="zh">ZH</button>
+    </div>
+    <button class="nav-cta" onclick="scroll2('chat-section')" data-i18n="nav_cta">무료로 시작하기</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow"><span class="ey-line"></span><span data-i18n="hero_eye">Global Regulatory Intelligence Platform</span></div>
+    <div class="hero-title" data-i18n="hero_t1">GMP<br>REGULATORY</div>
+    <div class="hero-title-italic" data-i18n="hero_t2">Intelligence</div>
+    <span class="hero-sub-word" data-i18n="hero_sub_word">의료기기 · 의약품 · 식품 · 화장품</span>
+    <p class="hero-desc" data-i18n="hero_desc"></p>
+    <div class="hero-btns">
+      <button class="btn-white" onclick="scroll2('chat-section')" data-i18n="hero_btn1">규정 상담 시작 →</button>
+      <a href="workflow.html" class="btn-ghost" data-i18n="hero_btn2">A–Z 워크플로우 →</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="metrics-grid">
+      <div class="metric-cell"><div class="m-num">4<em>개</em></div><div class="m-label" data-i18n="stat1">산업 분야</div></div>
+      <div class="metric-cell"><div class="m-num">20<em>+</em></div><div class="m-label" data-i18n="stat2">규제 기관</div></div>
+      <div class="metric-cell"><div class="m-num">4<em>개어</em></div><div class="m-label" data-i18n="stat3">지원 언어</div></div>
+      <div class="metric-cell"><div class="m-num">5<em>개국</em></div><div class="m-label" data-i18n="stat4">허가 서류</div></div>
+    </div>
+    <div class="hero-badge"><span class="badge-dot"></span><span data-i18n="hero_badge">MFDS · FDA · EMA · WHO · ICH · ISO 공식 문서 기반 · 출처 명시</span></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="mq-track"></div>
+</div>
+
+<!-- HOW -->
+<section class="sec" id="how">
+  <div class="eyebrow"><span class="eye-num">01</span><span data-i18n="s1">How It Works</span></div>
+  <div class="how-header">
+    <h2 class="how-title rev" data-i18n="how_title"></h2>
+    <p class="how-desc rev rev-d1" data-i18n="how_desc"></p>
+  </div>
+  <div class="steps-list">
+    <div class="step-card rev"><div class="s-num">01</div><div class="s-left"><span class="s-tag tag-g" data-i18n="step1_tag"></span><div class="s-title" data-i18n="step1_t"></div></div><p class="s-desc" data-i18n="step1_d"></p></div>
+    <div class="step-card rev rev-d1"><div class="s-num">02</div><div class="s-left"><span class="s-tag tag-o" data-i18n="step2_tag"></span><div class="s-title" data-i18n="step2_t"></div></div><p class="s-desc" data-i18n="step2_d"></p></div>
+    <div class="step-card rev rev-d2"><div class="s-num">03</div><div class="s-left"><span class="s-tag tag-r" data-i18n="step3_tag"></span><div class="s-title" data-i18n="step3_t"></div></div><p class="s-desc" data-i18n="step3_d"></p></div>
+  </div>
+</section>
+
+<!-- CHAT -->
+<section class="sec sec-dark" id="chat-section">
+  <div class="eyebrow eyebrow-dark"><span class="eye-num eye-num-dark">02</span><span data-i18n="s2">규정 상담</span></div>
+  <div class="chat-layout">
+    <div class="rev">
+      <h2 class="chat-info-title" data-i18n="chat_title"></h2>
+      <p class="chat-info-desc" data-i18n="chat_desc"></p>
+      <div class="feat-list">
+        <div class="feat-row"><div class="feat-ico">🏛️</div><div><div class="feat-tit" data-i18n="f1t"></div><div class="feat-dsc" data-i18n="f1d"></div></div></div>
+        <div class="feat-row"><div class="feat-ico">🌍</div><div><div class="feat-tit" data-i18n="f2t"></div><div class="feat-dsc" data-i18n="f2d"></div></div></div>
+        <div class="feat-row"><div class="feat-ico">🌐</div><div><div class="feat-tit" data-i18n="f3t"></div><div class="feat-dsc" data-i18n="f3d"></div></div></div>
+        <div class="feat-row"><div class="feat-ico">📄</div><div><div class="feat-tit" data-i18n="f4t"></div><div class="feat-dsc" data-i18n="f4d"></div></div></div>
+      </div>
+    </div>
+    <div class="chat-box rev rev-d1">
+      <div class="cb-head">
+        <div class="cb-logo">Global<em>AI</em>Reg</div>
+        <div class="cb-badge"><span class="cb-dot"></span><span data-i18n="cb_badge"></span></div>
+      </div>
+      <div class="cb-tabs">
+        <button class="cb-tab on" data-c="all" data-i18n="tab_all"></button>
+        <button class="cb-tab" data-c="medical" data-i18n="tab_med"></button>
+        <button class="cb-tab" data-c="pharma" data-i18n="tab_pha"></button>
+        <button class="cb-tab" data-c="food" data-i18n="tab_foo"></button>
+        <button class="cb-tab" data-c="cosmetic" data-i18n="tab_cos"></button>
+      </div>
+      <div id="chat-msgs"></div>
+      <div id="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><span data-i18n="typing"></span></div>
+      <div class="cb-inp">
+        <div class="inp-row">
+          <textarea id="chat-inp" rows="1" data-i18n-ph="inp_ph"></textarea>
+          <button id="send-btn" data-i18n="send"></button>
+        </div>
+        <div class="inp-hint" data-i18n="inp_hint"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOCS -->
+<section class="sec" id="docs">
+  <div class="eyebrow"><span class="eye-num">03</span><span data-i18n="s3">등록 서류</span></div>
+  <div class="docs-header rev">
+    <h2 class="docs-title" data-i18n="docs_title"></h2>
+    <p class="docs-sub" data-i18n="docs_desc"></p>
+  </div>
+  <div class="docs-grid rev rev-d1">
+    <div class="doc-block">
+      <div class="doc-head"><div class="doc-ico">🩺</div><div><div class="doc-cat" data-i18n="d_med"></div><div class="doc-en">Medical Device</div></div></div>
+      <div class="doc-countries">
+        <div class="dc-row"><div class="dc-flag">🇰🇷</div><div><div class="dc-nm">대한민국 (MFDS)</div><div class="dc-tags"><span class="dc-tag">기술문서</span><span class="dc-tag">임상자료</span><span class="dc-tag">GMP인증</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇺🇸</div><div><div class="dc-nm">USA (FDA)</div><div class="dc-tags"><span class="dc-tag">510(k)/PMA</span><span class="dc-tag">DHF</span><span class="dc-tag">Clinical Data</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇪🇺</div><div><div class="dc-nm">Europe (CE/MDR)</div><div class="dc-tags"><span class="dc-tag">Technical File</span><span class="dc-tag">CER</span><span class="dc-tag">DoC</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇯🇵</div><div><div class="dc-nm">日本 (PMDA)</div><div class="dc-tags"><span class="dc-tag">承認申請書</span><span class="dc-tag">QMS証明</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇨🇳</div><div><div class="dc-nm">中国 (NMPA)</div><div class="dc-tags"><span class="dc-tag">注册申请表</span><span class="dc-tag">技术文件</span></div></div></div>
+      </div>
+      <button class="doc-btn" onclick="askDoc('medical')" data-i18n="doc_btn"></button>
+    </div>
+    <div class="doc-block">
+      <div class="doc-head"><div class="doc-ico">💊</div><div><div class="doc-cat" data-i18n="d_pha"></div><div class="doc-en">Pharmaceutical</div></div></div>
+      <div class="doc-countries">
+        <div class="dc-row"><div class="dc-flag">🇰🇷</div><div><div class="dc-nm">대한민국 (MFDS)</div><div class="dc-tags"><span class="dc-tag">CTD신청서</span><span class="dc-tag">안전성·유효성</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇺🇸</div><div><div class="dc-nm">USA (FDA)</div><div class="dc-tags"><span class="dc-tag">NDA/ANDA</span><span class="dc-tag">CMC</span><span class="dc-tag">Labeling</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇪🇺</div><div><div class="dc-nm">Europe (EMA)</div><div class="dc-tags"><span class="dc-tag">MAA(CTD)</span><span class="dc-tag">RMP</span><span class="dc-tag">PSUR</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇯🇵</div><div><div class="dc-nm">日本 (PMDA)</div><div class="dc-tags"><span class="dc-tag">新薬承認申請</span><span class="dc-tag">CTD資料</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇨🇳</div><div><div class="dc-nm">中国 (NMPA)</div><div class="dc-tags"><span class="dc-tag">药品注册申请</span><span class="dc-tag">CTD</span></div></div></div>
+      </div>
+      <button class="doc-btn" onclick="askDoc('pharma')" data-i18n="doc_btn"></button>
+    </div>
+    <div class="doc-block">
+      <div class="doc-head"><div class="doc-ico">🥗</div><div><div class="doc-cat" data-i18n="d_foo"></div><div class="doc-en">Food</div></div></div>
+      <div class="doc-countries">
+        <div class="dc-row"><div class="dc-flag">🇰🇷</div><div><div class="dc-nm">대한민국 (MFDS)</div><div class="dc-tags"><span class="dc-tag">수입신고서</span><span class="dc-tag">시험성적서</span><span class="dc-tag">원산지증명</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇺🇸</div><div><div class="dc-nm">USA (FDA)</div><div class="dc-tags"><span class="dc-tag">FSMA FSVP</span><span class="dc-tag">Prior Notice</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇪🇺</div><div><div class="dc-nm">Europe (EFSA)</div><div class="dc-tags"><span class="dc-tag">Novel Food</span><span class="dc-tag">Safety Dossier</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇯🇵</div><div><div class="dc-nm">日本 (厚労省)</div><div class="dc-tags"><span class="dc-tag">食品輸入届出書</span><span class="dc-tag">試験成績書</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇨🇳</div><div><div class="dc-nm">中国 (GACC)</div><div class="dc-tags"><span class="dc-tag">GACC注册</span><span class="dc-tag">卫生证书</span></div></div></div>
+      </div>
+      <button class="doc-btn" onclick="askDoc('food')" data-i18n="doc_btn"></button>
+    </div>
+    <div class="doc-block">
+      <div class="doc-head"><div class="doc-ico">🧴</div><div><div class="doc-cat" data-i18n="d_cos"></div><div class="doc-en">Cosmetics</div></div></div>
+      <div class="doc-countries">
+        <div class="dc-row"><div class="dc-flag">🇰🇷</div><div><div class="dc-nm">대한민국 (MFDS)</div><div class="dc-tags"><span class="dc-tag">수입화장품신고</span><span class="dc-tag">안전성자료</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇺🇸</div><div><div class="dc-nm">USA (FDA)</div><div class="dc-tags"><span class="dc-tag">MoCRA Reg.</span><span class="dc-tag">Safety Sub.</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇪🇺</div><div><div class="dc-nm">Europe (CPNP)</div><div class="dc-tags"><span class="dc-tag">CPNP Notif.</span><span class="dc-tag">PIF</span><span class="dc-tag">CPSR</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇯🇵</div><div><div class="dc-nm">日本 (厚労省)</div><div class="dc-tags"><span class="dc-tag">化粧品製造販売届</span><span class="dc-tag">全成分</span></div></div></div>
+        <div class="dc-row"><div class="dc-flag">🇨🇳</div><div><div class="dc-nm">中国 (NMPA)</div><div class="dc-tags"><span class="dc-tag">进口化妆品注册</span><span class="dc-tag">安全评估</span></div></div></div>
+      </div>
+      <button class="doc-btn" onclick="askDoc('cosmetic')" data-i18n="doc_btn"></button>
+    </div>
+  </div>
+</section>
+
+<!-- WF BANNER -->
+<a href="workflow.html" class="wf-banner">
+  <div>
+    <div class="wf-label" data-i18n="wf_label">A to Z Workflow</div>
+    <div class="wf-title" data-i18n="wf_title"></div>
+  </div>
+  <div class="wf-arrow">→</div>
+</a>
+
+<!-- COVERAGE -->
+<section class="sec sec-dark" id="coverage">
+  <div class="eyebrow eyebrow-dark"><span class="eye-num eye-num-dark">04</span><span data-i18n="s4">규정 범위</span></div>
+  <div class="cov-header rev">
+    <h2 class="cov-title" data-i18n="cov_title"></h2>
+    <p class="cov-sub" data-i18n="cov_desc"></p>
+  </div>
+  <table class="cov-table rev rev-d1">
+    <thead><tr><th data-i18n="cov_th1"></th><th data-i18n="cov_th2"></th></tr></thead>
+    <tbody>
+      <tr><td><div class="cov-cat">🩺 <span data-i18n="tab_med"></span></div></td><td><div class="cov-regs"><span class="cov-reg">FDA 21 CFR 820</span><span class="cov-reg">EU MDR 2017/745</span><span class="cov-reg">EU IVDR</span><span class="cov-reg">ISO 13485</span><span class="cov-reg">MDSAP</span><span class="cov-reg">IEC 62304</span><span class="cov-reg">ISO 14971</span></div></td></tr>
+      <tr><td><div class="cov-cat">💊 <span data-i18n="tab_pha"></span></div></td><td><div class="cov-regs"><span class="cov-reg">ICH Q7/Q10</span><span class="cov-reg">EU GMP EudraLex</span><span class="cov-reg">FDA 21 CFR 211</span><span class="cov-reg">WHO GMP</span><span class="cov-reg">KGMP</span><span class="cov-reg">PIC/S GMP</span><span class="cov-reg">Annex 1~21</span></div></td></tr>
+      <tr><td><div class="cov-cat">🥗 <span data-i18n="tab_foo"></span></div></td><td><div class="cov-regs"><span class="cov-reg">FDA FSMA</span><span class="cov-reg">EU 852/2004</span><span class="cov-reg">Codex HACCP</span><span class="cov-reg">ISO 22000</span><span class="cov-reg">BRCGS</span><span class="cov-reg">FSSC 22000</span></div></td></tr>
+      <tr><td><div class="cov-cat">🧴 <span data-i18n="tab_cos"></span></div></td><td><div class="cov-regs"><span class="cov-reg">ISO 22716</span><span class="cov-reg">EU 1223/2009</span><span class="cov-reg">FDA MoCRA</span><span class="cov-reg">ASEAN</span><span class="cov-reg">CGMP</span><span class="cov-reg">화장품법</span></div></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- PRINCIPLES -->
+<section class="sec" id="principle">
+  <div class="eyebrow"><span class="eye-num">05</span><span data-i18n="s5">설계 원칙</span></div>
+  <div class="prin-header rev">
+    <h2 class="prin-title" data-i18n="prin_title"></h2>
+    <p class="prin-sub" data-i18n="prin_desc"></p>
+  </div>
+  <div class="prin-grid rev rev-d1">
+    <div class="prin-cell"><div class="prin-num">01 —</div><div class="prin-tit" data-i18n="p1t"></div><p class="prin-dsc" data-i18n="p1d"></p></div>
+    <div class="prin-cell"><div class="prin-num">02 —</div><div class="prin-tit" data-i18n="p2t"></div><p class="prin-dsc" data-i18n="p2d"></p></div>
+    <div class="prin-cell"><div class="prin-num">03 —</div><div class="prin-tit" data-i18n="p3t"></div><p class="prin-dsc" data-i18n="p3d"></p></div>
+    <div class="prin-cell"><div class="prin-num">04 —</div><div class="prin-tit" data-i18n="p4t"></div><p class="prin-dsc" data-i18n="p4d"></p></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-inner rev">
+    <div class="cta-eye" data-i18n="cta_eye"></div>
+    <h2 class="cta-title" data-i18n="cta_title"></h2>
+    <p class="cta-sub" data-i18n="cta_sub"></p>
+    <button class="btn-cta-white" onclick="scroll2('chat-section')" data-i18n="hero_btn1"></button>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">Global<em>AI</em>Reg</div>
+  <div>© 2025 GlobalAIReg · www.globalregai.info</div>
+  <div class="f-links"><a href="#" data-i18n="ft1"></a><a href="#" data-i18n="ft2"></a><a href="#" data-i18n="ft3"></a></div>
+</footer>
+
+<script>
+const T={
+  ko:{nav_how:'작동 방식',nav_chat:'규정 상담',nav_wf:'A–Z 워크플로우',nav_docs:'허가 서류',nav_cov:'규정 범위',nav_cta:'무료로 시작하기',
+    hero_eye:'Global Regulatory Intelligence Platform',
+    hero_t1:'GMP\nREGULATORY',hero_t2:'Intelligence',hero_sub_word:'의료기기 · 의약품 · 식품 · 화장품',
+    hero_desc:'<strong>MFDS · FDA · EMA</strong> 공식 규제 문서 기반.<br>출처 명시 3단계 구조로 국제 GMP 규정을 안내합니다.',
+    hero_btn1:'규정 상담 시작 →',hero_btn2:'A–Z 워크플로우 →',
+    hero_badge:'MFDS · FDA · EMA · WHO · ICH · ISO 공식 문서 기반 · 출처 명시',
+    stat1:'산업 분야',stat2:'규제 기관',stat3:'지원 언어',stat4:'허가 서류',
+    s1:'작동 방식',s2:'규정 상담',s3:'등록 서류',s4:'규정 범위',s5:'설계 원칙',
+    how_title:'3단계<br>구조<br><em>답변</em>',how_desc:'환각을 최소화하기 위해 공식 문서 인용 → 실무 해석 → 불확실 영역 분리 구조로만 답변합니다.',
+    step1_tag:'공식 문서',step1_t:'공식 문서에 명시된 내용만 인용',step1_d:'MFDS·FDA·EMA 공식 문서에서 직접 확인된 내용만 인용합니다. 조항 번호·날짜를 함께 제시하며 존재하지 않는 조항은 생성하지 않습니다.',
+    step2_tag:'실무 해석',step2_t:'질문 상황에 적용한 실무 해석',step2_d:'질문의 제품 특성·시장·타깃 국가와 공식 규정을 결합해 규제 실무 관점의 구체적 해석을 제공합니다.',
+    step3_tag:'불확실 분리',step3_t:'불확실 영역 분리 및 다음 확인 방향',step3_d:'문서로 결론이 나지 않는 부분은 투명하게 분리하고, "모른다"로 끝내지 않고 다음 확인 방향을 안내합니다.',
+    chat_title:'지금 바로<br><em>질문하세요</em>',chat_desc:'규정 조항·허가 요건·국가별 GMP 비교 등 출처와 함께 답변합니다.',
+    f1t:'공식 문서 기반 출처 명시',f1d:'모든 답변에 문서명·조항·날짜·유효 상태를 자동 표시합니다.',
+    f2t:'국가별 규정 비교',f2d:'한국·미국·유럽·WHO·ICH·ISO 규정을 동시에 비교합니다.',
+    f3t:'4개국어 지원',f3d:'한국어·영어·일본어·중국어로 질문하고 답변받을 수 있습니다.',
+    f4t:'허가 서류 안내',f4d:'국가별 허가 신청에 필요한 서류 목록 및 체크리스트를 제공합니다.',
+    cb_badge:'공식 문서 기반 · 출처 명시',
+    tab_all:'전체',tab_med:'🩺 의료기기',tab_pha:'💊 의약품',tab_foo:'🥗 식품',tab_cos:'🧴 화장품',
+    typing:'규제 문서 분석 중…',send:'전송 →',inp_ph:'규정·허가 요건·국가별 GMP 비교 등 질문하세요…',
+    inp_hint:'본 답변은 MFDS·FDA·EMA 공식 문서 기반이며, 최종 판단은 규제 전문가에게 확인하십시오.',
+    wf_label:'A to Z Workflow',wf_title:'허가 등록 단계별 체크리스트 — 처음부터 최종 승인까지',
+    docs_title:'국가별<br><em>허가 등록 서류</em>',docs_desc:'각 국가 허가 신청에 필요한 서류 목록을 안내하고, 체크리스트를 제공합니다.',
+    d_med:'의료기기',d_pha:'의약품',d_foo:'식품',d_cos:'화장품',
+    doc_btn:'✦ 상세 서류 목록 요청하기 →',
+    cov_title:'커버하는<br><em>규정 범위</em>',cov_desc:'4개 산업 분야, 20개 이상의 국제 규제 기관 및 표준을 커버합니다.',
+    cov_th1:'분야',cov_th2:'주요 규정 및 기관',
+    prin_title:'설계<br><em>원칙</em>',prin_desc:'잘못된 규제 정보는 사업에 치명적입니다. 4가지 핵심 원칙으로 설계되었습니다.',
+    p1t:'폐쇄형 규제 코퍼스',p1d:'MFDS·FDA·EMA 공식 문서만 지식 기반으로 사용합니다.',
+    p2t:'출처 없는 답변 금지',p2d:'모든 주장에 공식 문서명·조항·URL·날짜가 함께 제시됩니다.',
+    p3t:'추론과 사실의 분리',p3d:'팩트(①)·해석(②)·불확실(③)을 명확히 구분합니다.',
+    p4t:'휴먼 인 더 루프',p4d:'고위험 판단의 최종 책임은 규제 전문가에게 귀속합니다.',
+    cta_eye:'지금 시작하세요',cta_title:'규정을<br><em>확인하세요</em>',cta_sub:'MFDS·FDA·EMA 공식 문서 기반으로 국제 GMP 규정 및 허가 서류를 안내합니다.',
+    ft1:'이용약관',ft2:'개인정보처리방침',ft3:'문의',
+    welcome_h:'안녕하세요, GlobalAIReg입니다.',welcome_b:'<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> 공식 규제 문서 기반으로 국제 GMP 규정 및 국가별 허가 서류를 안내합니다.',welcome_hint:'출처(문서명·조항·날짜)는 항상 함께 표시됩니다.',
+    chips:['NMN 한국 수입 기준','의료기기 FDA vs EU MDR','ICH Q7 API GMP','일본 의약품 허가 서류'],
+    doc_q:{medical:'한국 의료기기 MFDS 허가 서류 전체 목록을 5개국 비교로 설명해줘',pharma:'한국 의약품 MFDS 품목허가 CTD 서류 목록을 미국·유럽 비교와 함께 설명해줘',food:'한국 식품 수입신고 필요 서류를 5개국 비교와 함께 설명해줘',cosmetic:'한국 화장품 수입 신고 서류를 미국·유럽·일본·중국 비교와 함께 설명해줘'},
+    mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','MFDS 의료기기법','건강기능식품법'],
+  },
+  en:{nav_how:'How It Works',nav_chat:'Consultation',nav_wf:'A–Z Workflow',nav_docs:'Documents',nav_cov:'Coverage',nav_cta:'Get Started',
+    hero_eye:'Global Regulatory Intelligence Platform',
+    hero_t1:'GMP\nREGULATORY',hero_t2:'Intelligence',hero_sub_word:'Medical · Pharma · Food · Cosmetics',
+    hero_desc:'<strong>MFDS · FDA · EMA</strong> official document-based platform.<br>International GMP regulations answered with cited 3-step structure.',
+    hero_btn1:'Start Consultation →',hero_btn2:'A–Z Workflow →',
+    hero_badge:'MFDS · FDA · EMA · WHO · ICH · ISO official docs · Source cited',
+    stat1:'Industries',stat2:'Regulators',stat3:'Languages',stat4:'Countries',
+    s1:'How It Works',s2:'Consultation',s3:'Documents',s4:'Coverage',s5:'Principles',
+    how_title:'3-Step<br>Structured<br><em>Answer</em>',how_desc:'To minimize hallucination: official doc citation → practical interpretation → uncertainty separation.',
+    step1_tag:'Official Doc',step1_t:'Only officially confirmed facts',step1_d:'Only cites content confirmed in official documents. Article numbers and dates always included — no fabricated clauses.',
+    step2_tag:'Interpretation',step2_t:'Applied practical interpretation',step2_d:'Combines product specifics, target market, and regulations to provide concrete regulatory guidance.',
+    step3_tag:'Uncertainty',step3_t:'Uncertainty separated + next steps',step3_d:'Transparently separates areas not covered by documents and guides you to next verification steps.',
+    chat_title:'Ask Your<br><em>Question</em>',chat_desc:'Regulations, approval requirements, country GMP comparisons — all answered with citations.',
+    f1t:'Source Citation',f1d:'Document name, article, date, and validity shown on every answer.',
+    f2t:'Country Comparison',f2d:'Korea·US·EU·WHO·ICH·ISO regulations compared simultaneously.',
+    f3t:'4 Languages',f3d:'Korean, English, Japanese, or Chinese — your choice.',
+    f4t:'Registration Docs',f4d:'Country-specific document lists and checklists provided.',
+    cb_badge:'Official Docs · Source Cited',
+    tab_all:'All',tab_med:'🩺 Medical',tab_pha:'💊 Pharma',tab_foo:'🥗 Food',tab_cos:'🧴 Cosmetics',
+    typing:'Analyzing regulatory documents…',send:'Send →',inp_ph:'Ask about regulations, approval requirements, GMP comparisons…',
+    inp_hint:'Answers based on official MFDS·FDA·EMA documents. Consult a regulatory professional for final decisions.',
+    wf_label:'A to Z Workflow',wf_title:'Step-by-step registration checklist — from first step to final approval',
+    docs_title:'Registration<br><em>Documents</em>',docs_desc:'Document lists for each country\'s approval process, with checklists.',
+    d_med:'Medical Device',d_pha:'Pharmaceutical',d_foo:'Food',d_cos:'Cosmetics',
+    doc_btn:'✦ Request detailed document list →',
+    cov_title:'Regulatory<br><em>Coverage</em>',cov_desc:'4 industries, 20+ international regulatory bodies and standards.',
+    cov_th1:'Industry',cov_th2:'Key Regulations & Agencies',
+    prin_title:'Design<br><em>Principles</em>',prin_desc:'Incorrect regulatory info is fatal to business. Built on 4 core principles.',
+    p1t:'Closed Regulatory Corpus',p1d:'Only MFDS·FDA·EMA official docs used as knowledge base.',
+    p2t:'No Answer Without Source',p2d:'Every claim includes document name, article, URL, and date.',
+    p3t:'Fact vs. Inference',p3d:'Facts (①), interpretation (②), uncertainty (③) clearly separated.',
+    p4t:'Human in the Loop',p4d:'Final judgment on high-risk matters rests with human experts.',
+    cta_eye:'Get Started Now',cta_title:'Verify<br><em>Regulations</em>',cta_sub:'Based on MFDS·FDA·EMA official docs — GMP regulations and registration documents for all 4 industries.',
+    ft1:'Terms',ft2:'Privacy',ft3:'Contact',
+    welcome_h:'Hello, I\'m GlobalAIReg.',welcome_b:'Based on <strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> official docs, I guide you through international GMP regulations and country-specific registration documents.',welcome_hint:'Sources (document name · article · date) always shown.',
+    chips:['NMN Korea import requirements','Medical device FDA vs EU MDR','ICH Q7 API GMP','Japan pharma registration docs'],
+    doc_q:{medical:'List all medical device registration documents for Korea, USA, EU, Japan, and China',pharma:'What documents are needed for pharmaceutical approval in Korea, USA, EU, Japan, and China?',food:'List all required documents for food import registration in Korea, USA, EU, Japan, and China',cosmetic:'What documents are required for cosmetic registration in Korea, USA, EU, Japan, and China?'},
+    mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','MFDS Medical Device Act','Health Functional Food Act'],
+  },
+  ja:{nav_how:'仕組み',nav_chat:'規制相談',nav_wf:'A–Zワークフロー',nav_docs:'承認書類',nav_cov:'規制範囲',nav_cta:'無料で始める',
+    hero_eye:'Global Regulatory Intelligence Platform',
+    hero_t1:'GMP\nREGULATORY',hero_t2:'Intelligence',hero_sub_word:'医療機器 · 医薬品 · 食品 · 化粧品',
+    hero_desc:'<strong>MFDS · FDA · EMA</strong> 公式規制文書基盤プラットフォーム。<br>出典明示の3段階構造で国際GMP規制をご案内します。',
+    hero_btn1:'規制相談を開始 →',hero_btn2:'A–Zワークフロー →',
+    hero_badge:'MFDS · FDA · EMA · WHO · ICH · ISO 公式文書基盤 · 出典明示',
+    stat1:'産業分野',stat2:'規制機関',stat3:'対応言語',stat4:'対応国',
+    s1:'仕組み',s2:'規制相談',s3:'承認書類',s4:'規制範囲',s5:'設計原則',
+    how_title:'3段階<br>構造<br><em>回答</em>',how_desc:'幻覚を最小化するため、公式文書引用→実務解釈→不確実領域分離の構造で回答します。',
+    step1_tag:'公式文書',step1_t:'公式文書の明示内容のみ引用',step1_d:'MFDS·FDA·EMA公式文書で確認された内容のみを引用。条項番号・日付を明示し、架空の条項は生成しません。',
+    step2_tag:'実務解釈',step2_t:'質問状況に適用した実務解釈',step2_d:'質問の製品特性・市場・ターゲット国と公式規制を組み合わせて具体的な解釈を提供します。',
+    step3_tag:'不確実分離',step3_t:'不確実領域の分離と次の確認',step3_d:'文書で結論が出ない部分は透明に分離し、次に確認すべき機関・文書を案内します。',
+    chat_title:'今すぐ<br><em>質問して</em>ください',chat_desc:'規制条項·承認要件·各国GMP比較など出典とともに回答します。',
+    f1t:'出典明示',f1d:'すべての回答に文書名·条項·日付·有効状態を自動表示します。',
+    f2t:'各国規制比較',f2d:'韓国·米国·欧州·WHO·ICH·ISO規制を同時に比較します。',
+    f3t:'4言語対応',f3d:'韓国語·英語·日本語·中国語で質問·回答が可能です。',
+    f4t:'承認書類案内',f4d:'各国承認申請に必要な書類リスト·チェックリストを提供します。',
+    cb_badge:'公式文書基盤 · 出典明示',tab_all:'全て',tab_med:'🩺 医療機器',tab_pha:'💊 医薬品',tab_foo:'🥗 食品',tab_cos:'🧴 化粧品',
+    typing:'規制文書を分析中…',send:'送信 →',inp_ph:'規制·承認要件·各国GMP比較など質問してください…',
+    inp_hint:'本回答はMFDS·FDA·EMA公式文書基盤です。最終判断は規制専門家にご確認ください。',
+    wf_label:'A to Z ワークフロー',wf_title:'承認登録ステップ別チェックリスト — 最初のステップから最終承認まで',
+    docs_title:'各国<br><em>承認登録書類</em>',docs_desc:'各国の承認申請に必要な書類リストをご案内します。',
+    d_med:'医療機器',d_pha:'医薬品',d_foo:'食品',d_cos:'化粧品',doc_btn:'✦ 詳細書類リストを依頼する →',
+    cov_title:'カバーする<br><em>規制範囲</em>',cov_desc:'4産業分野、20以上の国際規制機関·基準をカバーします。',cov_th1:'分野',cov_th2:'主要規制·機関',
+    prin_title:'設計<br><em>原則</em>',prin_desc:'誤った規制情報は事業に致命的です。4つのコア原則で設計されています。',
+    p1t:'閉鎖型規制コーパス',p1d:'MFDS·FDA·EMA公式文書のみを知識基盤として使用します。',
+    p2t:'出典なしの回答禁止',p2d:'全ての主張に公式文書名·条項·URL·日付が添付されます。',
+    p3t:'推論と事実の分離',p3d:'事実(①)·解釈(②)·不確実(③)を明確に区分します。',
+    p4t:'ヒューマン·イン·ザ·ループ',p4d:'高リスク規制判断の最終責任は人間の専門家に帰属します。',
+    cta_eye:'今すぐ始める',cta_title:'規制を<br><em>確認しましょう</em>',cta_sub:'MFDS·FDA·EMA公式文書基盤で医療機器·医薬品·食品·化粧品の国際GMP規制と承認書類をご案内します。',
+    ft1:'利用規約',ft2:'プライバシーポリシー',ft3:'お問い合わせ',
+    welcome_h:'GlobalAIRegへようこそ。',welcome_b:'<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> 公式規制文書基盤で国際GMP規制と各国承認書類をご案内します。',welcome_hint:'出典（文書名·条項·日付）は常に表示されます。',
+    chips:['NMN韓国輸入基準','医療機器 FDA vs EU MDR','ICH Q7 API GMP','医薬品日本承認書類'],
+    doc_q:{medical:'韓国·米国·EU·日本·中国の医療機器承認に必要な書類リストを比較説明してください',pharma:'韓国·米国·EU·日本·中国の医薬品承認に必要な書類リストを比較説明してください',food:'韓国·米国·EU·日本·中国への食品輸入登録に必要な書類リストを説明してください',cosmetic:'韓国·米国·EU·日本·中国の化粧品登録に必要な書類リストを説明してください'},
+    mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','薬機法','食品衛生法'],
+  },
+  zh:{nav_how:'工作原理',nav_chat:'法规咨询',nav_wf:'A–Z流程',nav_docs:'注册文件',nav_cov:'法规范围',nav_cta:'免费开始',
+    hero_eye:'Global Regulatory Intelligence Platform',
+    hero_t1:'GMP\nREGULATORY',hero_t2:'Intelligence',hero_sub_word:'医疗器械 · 药品 · 食品 · 化妆品',
+    hero_desc:'<strong>MFDS · FDA · EMA</strong> 官方法规文件基础平台。<br>以引用出处的三步结构提供国际GMP法规解答。',
+    hero_btn1:'开始法规咨询 →',hero_btn2:'A–Z工作流程 →',
+    hero_badge:'MFDS · FDA · EMA · WHO · ICH · ISO 官方文件基础 · 出处明示',
+    stat1:'行业领域',stat2:'监管机构',stat3:'支持语言',stat4:'覆盖国家',
+    s1:'工作原理',s2:'法规咨询',s3:'注册文件',s4:'法规范围',s5:'设计原则',
+    how_title:'三步<br>结构<br><em>解答</em>',how_desc:'为最大程度减少幻觉：官方文件引用→实务解释→不确定领域分离。',
+    step1_tag:'官方文件',step1_t:'仅引用官方文件确认内容',step1_d:'仅引用MFDS·FDA·EMA官方文件确认的内容，条款编号和日期一并提供，绝不生成不存在的条款。',
+    step2_tag:'实务解释',step2_t:'结合问题的实务适用解释',step2_d:'结合问题中的产品特性、市场、目标国家与官方法规，提供具体的监管实务解释。',
+    step3_tag:'不确定分离',step3_t:'不确定领域分离及下一步',step3_d:'透明分离文件无法给出结论的部分，并指引下一步需确认的文件和机构。',
+    chat_title:'立即<br><em>提问</em>',chat_desc:'法规条款、审批要求、各国GMP比较等，附出处解答。',
+    f1t:'出处明示',f1d:'所有解答自动显示文件名·条款·日期·有效状态。',
+    f2t:'各国法规比较',f2d:'同时比较韩国·美国·欧洲·WHO·ICH·ISO法规。',
+    f3t:'四语言支持',f3d:'可用韩语、英语、日语、中文提问和接收解答。',
+    f4t:'注册文件指南',f4d:'提供各国注册申请所需文件清单及核查表。',
+    cb_badge:'官方文件基础 · 出处明示',tab_all:'全部',tab_med:'🩺 医疗器械',tab_pha:'💊 药品',tab_foo:'🥗 食品',tab_cos:'🧴 化妆品',
+    typing:'正在分析法规文件…',send:'发送 →',inp_ph:'请咨询法规条款、审批要求、各国GMP比较等…',
+    inp_hint:'本解答基于MFDS·FDA·EMA官方文件，最终判断请咨询监管专业人员。',
+    wf_label:'A to Z 工作流程',wf_title:'注册登记步骤核查表 — 从第一步到最终批准',
+    docs_title:'各国<br><em>注册文件</em>',docs_desc:'各国注册申请所需文件清单及核查表。',
+    d_med:'医疗器械',d_pha:'药品',d_foo:'食品',d_cos:'化妆品',doc_btn:'✦ 请求详细文件清单 →',
+    cov_title:'覆盖的<br><em>法规范围</em>',cov_desc:'覆盖4个行业领域，20余个国际监管机构及标准。',cov_th1:'行业',cov_th2:'主要法规及机构',
+    prin_title:'设计<br><em>原则</em>',prin_desc:'错误的法规信息对业务至关重要。基于4项核心原则设计。',
+    p1t:'封闭型法规语料库',p1d:'仅使用MFDS·FDA·EMA官方文件作为知识库。',
+    p2t:'无出处不作答',p2d:'所有主张均附官方文件名·条款·URL·日期。',
+    p3t:'事实与推论分离',p3d:'事实(①)·解释(②)·不确定(③)明确区分。',
+    p4t:'人工监督机制',p4d:'高风险法规判断的最终责任归属于人类专业人员。',
+    cta_eye:'立即开始',cta_title:'确认<br><em>法规</em>',cta_sub:'基于MFDS·FDA·EMA官方文件，提供医疗器械·药品·食品·化妆品国际GMP法规及注册文件指南。',
+    ft1:'使用条款',ft2:'隐私政策',ft3:'联系我们',
+    welcome_h:'您好，我是GlobalAIReg。',welcome_b:'基于<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong>官方法规文件，为您提供国际GMP法规及各国注册文件指引。',welcome_hint:'出处（文件名·条款·日期）始终随答案一并显示。',
+    chips:['NMN韩国进口标准','医疗器械FDA vs EU MDR','ICH Q7 API GMP','药品日本注册文件'],
+    doc_q:{medical:'请详细比较韩国·美国·欧洲·日本·中国医疗器械注册申请所需全部文件清单',pharma:'请详细比较韩国·美国·欧洲·日本·中国药品注册申请所需全部文件清单',food:'请详细比较韩国·美国·欧洲·日本·中国进口食品注册所需全部文件清单',cosmetic:'请详细比较韩国·美国·欧洲·日本·中国化妆品注册申请所需全部文件清单'},
+    mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','医疗器械监督管理条例','药品注册管理办法'],
+  }
+};
+
+let lang='ko',cat='all',history=[];
+const BADGE={MFDS:'sbm',FDA:'sbf',EMA:'sbe',WHO:'sbw',ICH:'sbm',ISO:'sbm'};
+const LANG_SYS={ko:'한국어로 답변하라.',en:'Answer in English.',ja:'日本語で回答してください。',zh:'请用中文回答。'};
+
+function scroll2(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'})}
+
+function applyLang(l){
+  lang=l;document.documentElement.lang=l;
+  const t=T[l];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k]!==undefined)el.innerHTML=t[k]});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.dataset.i18nPh;if(t[k]!==undefined)el.placeholder=t[k]});
+  document.querySelectorAll('.lb').forEach(b=>b.classList.toggle('on',b.dataset.lang===l));
+  buildMarquee();
+}
+document.querySelectorAll('.lb').forEach(b=>{b.onclick=()=>{applyLang(b.dataset.lang);rebuildWelcome()}});
+
+function buildMarquee(){
+  const items=[...T[lang].mq,...T[lang].mq];
+  document.getElementById('mq-track').innerHTML=items.map(x=>`<div class="m-item"><em>◆</em> ${x}</div>`).join('');
+}
+
+document.querySelectorAll('.cb-tab').forEach(t=>{
+  t.onclick=()=>{document.querySelectorAll('.cb-tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');cat=t.dataset.c}
+});
+
+function buildSys(){
+  const cn={all:'전체',medical:'의료기기',pharma:'의약품',food:'식품',cosmetic:'화장품'}[cat];
+  return `You are GlobalAIReg at www.globalregai.info — an international GMP regulatory intelligence platform.
+${LANG_SYS[lang]} Category: ${cn}
+Answer ONLY from official regulatory documents: MFDS, FDA, EMA, WHO, ICH, ISO, PMDA, NMPA.
+Do NOT use the word "AI" in any response — refer to yourself only as "GlobalAIReg" or "본 시스템".
+[1] Official facts only — never fabricate article numbers or clauses.
+[2] Practical interpretation with source citations.
+[3] Uncertain areas + next verification steps. Never end with "I don't know".
+JSON ONLY — no markdown code blocks:
+{"sections":[{"type":"official","title":"[1] ...","body":"..."},{"type":"analysis","title":"[2] ...","body":"..."},{"type":"uncertainty","title":"[3] ...","body":"..."}],"sources":[{"agency":"MFDS","doc":"name","section":"art","date":"YYYY-MM","status":"current"}],"disclaimer":"..."}`;
+}
+
+function renderAI(raw){
+  const w=document.createElement('div');w.className='bub';
+  let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim())}
+  catch(e){w.innerHTML=`<div class="acard"><div class="abody">${raw.replace(/\n/g,'<br>')}</div></div>`;return w}
+  const im={official:'ic1',analysis:'ic2',uncertainty:'ic3'};
+  const sm={official:'①',analysis:'②',uncertainty:'③'};
+  (p.sections||[]).forEach(s=>{
+    const c=document.createElement('div');c.className='acard';
+    c.innerHTML=`<div class="ahead"><div class="aic ${im[s.type]||'ic1'}">${sm[s.type]||'①'}</div><span class="aht">${s.title||''}</span></div><div class="abody">${(s.body||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+    w.appendChild(c);
+  });
+  if(p.sources?.length){
+    const sc=document.createElement('div');sc.className='acard';
+    sc.innerHTML=`<div class="ahead"><div class="aic ic-src">📎</div><span class="aht">Sources</span></div>`;
+    const sr=document.createElement('div');sr.className='src-rows';
+    p.sources.forEach(s=>{
+      const si=document.createElement('div');si.className='src-row';
+      const bc=BADGE[s.agency]||'sbw';
+      si.innerHTML=`<span class="sb ${bc}">${s.agency}</span><div class="src-info"><strong>${s.doc||''}</strong>${s.section?` · ${s.section}`:''}${s.date?`<br>${s.date} `:''}${s.status==='current'?'<span class="src-ok">● 유효</span>':''}</div>`;
+      sr.appendChild(si);
+    });
+    sc.appendChild(sr);w.appendChild(sc);
+  }
+  if(p.disclaimer){const d=document.createElement('div');d.className='disc';d.textContent=p.disclaimer;w.appendChild(d)}
+  return w;
+}
+
+function addMsg(role,content){
+  const row=document.createElement('div');row.className='msg '+role;
+  const av=document.createElement('div');av.className='av';av.textContent=role==='ai'?'G':'U';
+  const bub=typeof content==='string'?(()=>{const d=document.createElement('div');d.className='bub';d.innerHTML=content;return d})():content;
+  row.appendChild(av);row.appendChild(bub);
+  const msgs=document.getElementById('chat-msgs');
+  msgs.appendChild(row);msgs.scrollTop=msgs.scrollHeight;
+  return bub;
+}
+
+async function sendChat(text){
+  if(!text)return;
+  addMsg('user',`<span>${text.replace(/\n/g,'<br>')}</span>`);
+  history.push({role:'user',content:text});
+  document.getElementById('chat-inp').value='';
+  document.getElementById('chat-inp').style.height='';
+  document.getElementById('send-btn').disabled=true;
+  const msgs=document.getElementById('chat-msgs');
+  const typ=document.getElementById('typing');
+  msgs.appendChild(typ);typ.classList.add('on');msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:buildSys(),messages:history})});
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'{}';
+    history.push({role:'assistant',content:raw});
+    typ.classList.remove('on');
+    const bub=renderAI(raw);
+    const cw=document.createElement('div');cw.className='chips';
+    (T[lang].chips||[]).forEach(q=>{const c=document.createElement('button');c.className='chip';c.textContent=q;c.onclick=()=>sendChat(q);cw.appendChild(c)});
+    bub.appendChild(cw);
+    addMsg('ai',bub);
+  }catch(e){typ.classList.remove('on');addMsg('ai','<span style="color:var(--red);">⚠️ 오류 발생. 잠시 후 다시 시도해주세요.</span>')}
+  document.getElementById('send-btn').disabled=false;
+  document.getElementById('chat-inp').focus();
+}
+
+function askDoc(c){
+  scroll2('chat-section');
+  const q=(T[lang].doc_q||T.ko.doc_q)[c];
+  setTimeout(()=>sendChat(q),500);
+}
+
+document.getElementById('send-btn').onclick=()=>sendChat(document.getElementById('chat-inp').value.trim());
+document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat(document.getElementById('chat-inp').value.trim())}});
+document.getElementById('chat-inp').addEventListener('input',function(){this.style.height='';this.style.height=Math.min(this.scrollHeight,100)+'px'});
+
+function rebuildWelcome(){
+  document.getElementById('chat-msgs').innerHTML='';history=[];
+  const t=T[lang];
+  const bub=document.createElement('div');bub.className='bub';
+  bub.innerHTML=`<div class="acard"><div class="abody" style="padding:13px 13px 11px;"><strong style="font-size:14px;">${t.welcome_h}</strong><br><br>${t.welcome_b}<br><span style="font-size:11px;color:var(--muted);margin-top:5px;display:block;">${t.welcome_hint}</span></div></div>`;
+  const cw=document.createElement('div');cw.className='chips';
+  (t.chips||[]).forEach(q=>{const c=document.createElement('button');c.className='chip';c.textContent=q;c.onclick=()=>sendChat(q);cw.appendChild(c)});
+  bub.appendChild(cw);
+  addMsg('ai',bub);
+}
+
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')})},{threshold:.1});
+document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
+
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY+70;
+  document.querySelectorAll('section[id]').forEach(s=>{
+    if(y>=s.offsetTop&&y<s.offsetTop+s.offsetHeight){
+      document.querySelectorAll('.nav-links a').forEach(a=>{a.style.color=a.getAttribute('href')==='#'+s.id?'var(--black)':''});
+    }
+  });
+});
+
+applyLang('ko');
+rebuildWelcome();
+</script>
+</body>
+</html>
