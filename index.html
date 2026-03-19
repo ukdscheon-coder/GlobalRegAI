@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GlobalAIReg — 국제 GMP 규제 인텔리전스</title>
+<title>GlobalRegAI — 국제 GMP 규제 인텔리전스</title>
 <meta name="description" content="MFDS·FDA·EMA 공식 규제 문서 기반. 의료기기·의약품·식품·화장품 국제 GMP 규정 플랫폼.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,600;1,700&family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -169,6 +169,9 @@ nav{
 /* CHAT BOX */
 .chat-box{background:var(--white);border:1px solid var(--rule);border-radius:14px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.12)}
 .cb-head{padding:13px 18px;border-bottom:1px solid var(--rule2);display:flex;align-items:center;gap:10px;background:var(--white)}
+.cb-actions{margin-left:auto;display:flex;gap:4px;}
+.cb-act-btn{background:none;border:1px solid var(--rule2);border-radius:6px;padding:4px 8px;font-size:13px;cursor:pointer;transition:all .15s;}
+.cb-act-btn:hover{background:var(--off2);border-color:var(--rule);}
 .cb-logo{font-family:var(--fc);font-size:16px;letter-spacing:.5px;color:var(--black)}
 .cb-logo em{color:var(--green);font-style:normal}
 .cb-badge{margin-left:auto;font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px;font-weight:400}
@@ -392,8 +395,13 @@ footer{padding:36px 48px;background:var(--black);display:flex;align-items:center
     </div>
     <div class="chat-box rev rev-d1">
       <div class="cb-head">
-        <div class="cb-logo">Global<em>AI</em>Reg</div>
+        <div class="cb-logo">Global<em>Reg</em>AI</div>
         <div class="cb-badge"><span class="cb-dot"></span><span data-i18n="cb_badge"></span></div>
+        <div class="cb-actions">
+          <button class="cb-act-btn" onclick="copyChat()" title="대화 복사">📋</button>
+          <button class="cb-act-btn" onclick="printChat()" title="인쇄">🖨️</button>
+          <button class="cb-act-btn" onclick="clearChat()" title="대화 초기화">🗑️</button>
+        </div>
       </div>
       <div class="cb-tabs">
         <button class="cb-tab on" data-c="all" data-i18n="tab_all"></button>
@@ -524,7 +532,7 @@ footer{padding:36px 48px;background:var(--black);display:flex;align-items:center
 
 <footer>
   <div class="f-logo">Global<em>AI</em>Reg</div>
-  <div>© 2025 GlobalAIReg · www.globalregai.info</div>
+  <div>© 2025 GlobalRegAI · www.globalregai.info</div>
   <div class="f-links"><a href="#" data-i18n="ft1"></a><a href="#" data-i18n="ft2"></a><a href="#" data-i18n="ft3"></a></div>
 </footer>
 
@@ -564,7 +572,7 @@ const T={
     p4t:'휴먼 인 더 루프',p4d:'고위험 판단의 최종 책임은 규제 전문가에게 귀속합니다.',
     cta_eye:'지금 시작하세요',cta_title:'규정을<br><em>확인하세요</em>',cta_sub:'MFDS·FDA·EMA 공식 문서 기반으로 국제 GMP 규정 및 허가 서류를 안내합니다.',
     ft1:'이용약관',ft2:'개인정보처리방침',ft3:'문의',
-    welcome_h:'안녕하세요, GlobalAIReg입니다.',welcome_b:'<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> 공식 규제 문서 기반으로 국제 GMP 규정 및 국가별 허가 서류를 안내합니다.',welcome_hint:'출처(문서명·조항·날짜)는 항상 함께 표시됩니다.',
+    welcome_h:'안녕하세요, GlobalRegAI입니다.',welcome_b:'<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> 공식 규제 문서 기반으로 국제 GMP 규정 및 국가별 허가 서류를 안내합니다.',welcome_hint:'출처(문서명·조항·날짜)는 항상 함께 표시됩니다.',
     chips:['NMN 한국 수입 기준','의료기기 FDA vs EU MDR','ICH Q7 API GMP','일본 의약품 허가 서류'],
     doc_q:{medical:'한국 의료기기 MFDS 허가 서류 전체 목록을 5개국 비교로 설명해줘',pharma:'한국 의약품 MFDS 품목허가 CTD 서류 목록을 미국·유럽 비교와 함께 설명해줘',food:'한국 식품 수입신고 필요 서류를 5개국 비교와 함께 설명해줘',cosmetic:'한국 화장품 수입 신고 서류를 미국·유럽·일본·중국 비교와 함께 설명해줘'},
     mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','MFDS 의료기기법','건강기능식품법'],
@@ -603,7 +611,7 @@ const T={
     p4t:'Human in the Loop',p4d:'Final judgment on high-risk matters rests with human experts.',
     cta_eye:'Get Started Now',cta_title:'Verify<br><em>Regulations</em>',cta_sub:'Based on MFDS·FDA·EMA official docs — GMP regulations and registration documents for all 4 industries.',
     ft1:'Terms',ft2:'Privacy',ft3:'Contact',
-    welcome_h:'Hello, I\'m GlobalAIReg.',welcome_b:'Based on <strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> official docs, I guide you through international GMP regulations and country-specific registration documents.',welcome_hint:'Sources (document name · article · date) always shown.',
+    welcome_h:'Hello, I\'m GlobalRegAI.',welcome_b:'Based on <strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> official docs, I guide you through international GMP regulations and country-specific registration documents.',welcome_hint:'Sources (document name · article · date) always shown.',
     chips:['NMN Korea import requirements','Medical device FDA vs EU MDR','ICH Q7 API GMP','Japan pharma registration docs'],
     doc_q:{medical:'List all medical device registration documents for Korea, USA, EU, Japan, and China',pharma:'What documents are needed for pharmaceutical approval in Korea, USA, EU, Japan, and China?',food:'List all required documents for food import registration in Korea, USA, EU, Japan, and China',cosmetic:'What documents are required for cosmetic registration in Korea, USA, EU, Japan, and China?'},
     mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','MFDS Medical Device Act','Health Functional Food Act'],
@@ -639,7 +647,7 @@ const T={
     p4t:'ヒューマン·イン·ザ·ループ',p4d:'高リスク規制判断の最終責任は人間の専門家に帰属します。',
     cta_eye:'今すぐ始める',cta_title:'規制を<br><em>確認しましょう</em>',cta_sub:'MFDS·FDA·EMA公式文書基盤で医療機器·医薬品·食品·化粧品の国際GMP規制と承認書類をご案内します。',
     ft1:'利用規約',ft2:'プライバシーポリシー',ft3:'お問い合わせ',
-    welcome_h:'GlobalAIRegへようこそ。',welcome_b:'<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> 公式規制文書基盤で国際GMP規制と各国承認書類をご案内します。',welcome_hint:'出典（文書名·条項·日付）は常に表示されます。',
+    welcome_h:'GlobalRegAIへようこそ。',welcome_b:'<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong> 公式規制文書基盤で国際GMP規制と各国承認書類をご案内します。',welcome_hint:'出典（文書名·条項·日付）は常に表示されます。',
     chips:['NMN韓国輸入基準','医療機器 FDA vs EU MDR','ICH Q7 API GMP','医薬品日本承認書類'],
     doc_q:{medical:'韓国·米国·EU·日本·中国の医療機器承認に必要な書類リストを比較説明してください',pharma:'韓国·米国·EU·日本·中国の医薬品承認に必要な書類リストを比較説明してください',food:'韓国·米国·EU·日本·中国への食品輸入登録に必要な書類リストを説明してください',cosmetic:'韓国·米国·EU·日本·中国の化粧品登録に必要な書類リストを説明してください'},
     mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','薬機法','食品衛生法'],
@@ -675,7 +683,7 @@ const T={
     p4t:'人工监督机制',p4d:'高风险法规判断的最终责任归属于人类专业人员。',
     cta_eye:'立即开始',cta_title:'确认<br><em>法规</em>',cta_sub:'基于MFDS·FDA·EMA官方文件，提供医疗器械·药品·食品·化妆品国际GMP法规及注册文件指南。',
     ft1:'使用条款',ft2:'隐私政策',ft3:'联系我们',
-    welcome_h:'您好，我是GlobalAIReg。',welcome_b:'基于<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong>官方法规文件，为您提供国际GMP法规及各国注册文件指引。',welcome_hint:'出处（文件名·条款·日期）始终随答案一并显示。',
+    welcome_h:'您好，我是GlobalRegAI。',welcome_b:'基于<strong>MFDS · FDA · EMA · WHO · ICH · ISO</strong>官方法规文件，为您提供国际GMP法规及各国注册文件指引。',welcome_hint:'出处（文件名·条款·日期）始终随答案一并显示。',
     chips:['NMN韩国进口标准','医疗器械FDA vs EU MDR','ICH Q7 API GMP','药品日本注册文件'],
     doc_q:{medical:'请详细比较韩国·美国·欧洲·日本·中国医疗器械注册申请所需全部文件清单',pharma:'请详细比较韩国·美国·欧洲·日本·中国药品注册申请所需全部文件清单',food:'请详细比较韩国·美国·欧洲·日本·中国进口食品注册所需全部文件清单',cosmetic:'请详细比较韩国·美国·欧洲·日本·中国化妆品注册申请所需全部文件清单'},
     mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','医疗器械监督管理条例','药品注册管理办法'],
@@ -709,10 +717,10 @@ document.querySelectorAll('.cb-tab').forEach(t=>{
 
 function buildSys(){
   const cn={all:'전체',medical:'의료기기',pharma:'의약품',food:'식품',cosmetic:'화장품'}[cat];
-  return `You are GlobalAIReg at www.globalregai.info — an international GMP regulatory intelligence platform.
+  return `You are GlobalRegAI at www.globalregai.info — an international GMP regulatory intelligence platform.
 ${LANG_SYS[lang]} Category: ${cn}
 Answer ONLY from official regulatory documents: MFDS, FDA, EMA, WHO, ICH, ISO, PMDA, NMPA.
-Do NOT use the word "AI" in any response — refer to yourself only as "GlobalAIReg" or "본 시스템".
+Do NOT use the word "AI" in any response — refer to yourself only as "GlobalRegAI" or "본 시스템".
 [1] Official facts only — never fabricate article numbers or clauses.
 [2] Practical interpretation with source citations.
 [3] Uncertain areas + next verification steps. Never end with "I don't know".
@@ -778,12 +786,47 @@ async function sendChat(text){
     (T[lang].chips||[]).forEach(q=>{const c=document.createElement('button');c.className='chip';c.textContent=q;c.onclick=()=>sendChat(q);cw.appendChild(c)});
     bub.appendChild(cw);
     addMsg('ai',bub);
-  }catch(e){typ.classList.remove('on');addMsg('ai','<span style="color:var(--red);">⚠️ 오류 발생. 잠시 후 다시 시도해주세요.</span>')}
+  }catch(e){
+    typ.classList.remove('on');
+    const errMsg = e.message?.includes('Failed to fetch') ? '⚠️ 네트워크 연결을 확인해주세요.' :
+      e.message?.includes('401') ? '⚠️ API 인증 오류입니다.' :
+      e.message?.includes('429') ? '⚠️ 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' :
+      e.message?.includes('500') ? '⚠️ 서버 오류입니다. 잠시 후 다시 시도해주세요.' :
+      '⚠️ 오류가 발생했습니다. 다시 시도해주세요.';
+    addMsg('ai',`<span style="color:var(--red);">${errMsg}</span>`);
+    history.pop();
+  }
   document.getElementById('send-btn').disabled=false;
   document.getElementById('chat-inp').focus();
 }
 
-function askDoc(c){
+function clearChat(){
+  document.getElementById('chat-msgs').innerHTML='';
+  history=[];
+  rebuildWelcome();
+}
+
+function copyChat(){
+  const msgs = document.getElementById('chat-msgs');
+  const text = Array.from(msgs.querySelectorAll('.bub')).map(b=>b.innerText).join('\n\n---\n\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.querySelector('[onclick="copyChat()"]');
+    btn.textContent='✅';
+    setTimeout(()=>btn.textContent='📋',2000);
+  });
+}
+
+function printChat(){
+  const msgs = document.getElementById('chat-msgs');
+  const content = msgs.innerHTML;
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>GlobalRegAI 대화 내용</title>
+  <style>body{font-family:'Noto Sans KR',sans-serif;max-width:800px;margin:40px auto;padding:20px;font-size:14px;line-height:1.7;}
+  .msg{margin-bottom:20px;} .msg.user{text-align:right;} </style></head>
+  <body><h2>GlobalRegAI — 규제 상담 내용</h2><hr>${content}</body></html>`);
+  w.document.close();
+  w.print();
+}
   scroll2('chat-section');
   const q=(T[lang].doc_q||T.ko.doc_q)[c];
   setTimeout(()=>sendChat(q),500);

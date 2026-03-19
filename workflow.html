@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GlobalAIReg — 허가 등록 워크플로우</title>
+<title>GlobalRegAI — 허가 등록 워크플로우</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -261,7 +261,7 @@ nav{position:sticky;top:0;z-index:100;height:56px;display:flex;align-items:cente
 <div class="ai-panel" id="ai-panel">
   <div class="ai-panel-header">
     <div class="ai-av" style="background:var(--teal);color:var(--navy);font-family:var(--font-disp);font-size:11px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">G</div>
-    <div class="ai-panel-title">GlobalAIReg — 규제 AI 상담</div>
+    <div class="ai-panel-title">GlobalRegAI — 규제 AI 상담</div>
     <button class="ai-close" onclick="toggleAI()">✕</button>
   </div>
   <div class="ai-msgs" id="ai-msgs">
@@ -588,7 +588,7 @@ async function sendAI(){
   try{
     const catName=selectedCat?{medical:'의료기기',pharma:'의약품',cosmetic:'화장품',food:'식품'}[selectedCat]:'전체';
     const countryName=selectedCountry?{kr:'한국(MFDS)',us:'미국(FDA)',eu:'유럽(EMA/CE)',jp:'일본(PMDA)',cn:'중국(NMPA)'}[selectedCountry]:'전체';
-    const system=`You are GlobalAIReg at www.globalregai.info. Answer in Korean.
+    const system=`You are GlobalRegAI at www.globalregai.info. Answer in Korean.
 Current workflow context: ${catName} — ${countryName} 허가 절차.
 Answer ONLY based on official regulatory documents (MFDS, FDA, EMA, WHO, ICH, ISO, PMDA, NMPA).
 Rules: [1] Official doc facts only. [2] Practical interpretation with citations. [3] Uncertain areas + next steps.
@@ -600,7 +600,14 @@ JSON only — no markdown:
     aiHistory.push({role:'assistant',content:raw});
     typing.classList.remove('on');
     renderAIBub(raw);
-  }catch(e){ typing.classList.remove('on'); addAIMsg('ai','<span style="color:#e74c3c;">⚠️ 오류 발생. 다시 시도해주세요.</span>'); }
+  }catch(e){
+    typing.classList.remove('on');
+    const errMsg = e.message?.includes('Failed to fetch') ? '⚠️ 네트워크 연결을 확인해주세요.' :
+      e.message?.includes('401') ? '⚠️ API 인증 오류입니다.' :
+      e.message?.includes('429') ? '⚠️ 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' :
+      '⚠️ 오류가 발생했습니다. 다시 시도해주세요.';
+    addAIMsg('ai',`<span style="color:#e74c3c;">${errMsg}</span>`);
+  }
   send.disabled=false;
 }
 
