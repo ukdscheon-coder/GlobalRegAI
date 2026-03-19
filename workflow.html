@@ -594,7 +594,7 @@ Answer ONLY based on official regulatory documents (MFDS, FDA, EMA, WHO, ICH, IS
 Rules: [1] Official doc facts only. [2] Practical interpretation with citations. [3] Uncertain areas + next steps.
 JSON only — no markdown:
 {"sections":[{"type":"official","title":"[1] 공식 문서 근거","body":"..."},{"type":"analysis","title":"[2] 실무 적용","body":"..."},{"type":"uncertainty","title":"[3] 추가 확인 사항","body":"..."}],"sources":[{"agency":"MFDS","doc":"문서명","section":"조항","date":"YYYY-MM","status":"current"}],"disclaimer":"..."}`;
-    const GKEY='AIzaSyDmngKLhYvvQDFGPQLSao0SaqDuaW1pqHk';
+    const GKEY='AIzaSyDQjieqZaPZ0YjWV_S2jj1_2ZJS76u-uew';
     const MODELS=['gemini-2.0-flash-lite','gemini-2.0-flash','gemini-1.5-flash-8b','gemini-1.5-pro'];
     async function callGemini(contents,systemText){
       for(const model of MODELS){
