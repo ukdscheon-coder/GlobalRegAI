@@ -551,7 +551,7 @@ footer{padding:36px 48px;background:var(--black);display:flex;align-items:center
           <li style="color:var(--muted);">✗ 허가 서류 목록</li>
           <li style="color:var(--muted);">✗ 우선 지원</li>
         </ul>
-        <button onclick="closeSubscribe();scroll2('chat-section')" style="width:100%;padding:12px;border:1.5px solid var(--rule);border-radius:6px;background:none;font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;color:var(--ink);">무료로 시작하기</button>
+        <button onclick="closeSubscribe();scroll2('chat-section')" style="width:100%;padding:12px;border:1.5px solid var(--rule);border-radius:6px;background:none;font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;color:var(--ink);">시작하기</button>
       </div>
       <!-- PRO -->
       <div style="border:2px solid var(--green);border-radius:12px;padding:28px 24px;position:relative;background:var(--green-p);">
@@ -591,7 +591,7 @@ footer{padding:36px 48px;background:var(--black);display:flex;align-items:center
 
 <script>
 const T={
-  ko:{nav_how:'작동 방식',nav_chat:'규정 상담',nav_wf:'A–Z 워크플로우',nav_docs:'허가 서류',nav_cov:'규정 범위',nav_cta:'무료로 시작하기',
+  ko:{nav_how:'작동 방식',nav_chat:'규정 상담',nav_wf:'A–Z 워크플로우',nav_docs:'허가 서류',nav_cov:'규정 범위',nav_cta:'시작하기',
     hero_eye:'Global Regulatory Intelligence Platform',
     hero_t1:'GMP\nREGULATORY',hero_t2:'Intelligence',hero_sub_word:'의료기기 · 의약품 · 식품 · 화장품',
     hero_desc:'<strong>MFDS · FDA · EMA</strong> 공식 규제 문서 기반.<br>출처 명시 3단계 구조로 국제 GMP 규정을 안내합니다.',
@@ -669,7 +669,7 @@ const T={
     doc_q:{medical:'List all medical device registration documents for Korea, USA, EU, Japan, and China',pharma:'What documents are needed for pharmaceutical approval in Korea, USA, EU, Japan, and China?',food:'List all required documents for food import registration in Korea, USA, EU, Japan, and China',cosmetic:'What documents are required for cosmetic registration in Korea, USA, EU, Japan, and China?'},
     mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','MFDS Medical Device Act','Health Functional Food Act'],
   },
-  ja:{nav_how:'仕組み',nav_chat:'規制相談',nav_wf:'A–Zワークフロー',nav_docs:'承認書類',nav_cov:'規制範囲',nav_cta:'無料で始める',
+  ja:{nav_how:'仕組み',nav_chat:'規制相談',nav_wf:'A–Zワークフロー',nav_docs:'承認書類',nav_cov:'規制範囲',nav_cta:'始める',
     hero_eye:'Global Regulatory Intelligence Platform',
     hero_t1:'GMP\nREGULATORY',hero_t2:'Intelligence',hero_sub_word:'医療機器 · 医薬品 · 食品 · 化粧品',
     hero_desc:'<strong>MFDS · FDA · EMA</strong> 公式規制文書基盤プラットフォーム。<br>出典明示の3段階構造で国際GMP規制をご案内します。',
@@ -705,7 +705,7 @@ const T={
     doc_q:{medical:'韓国·米国·EU·日本·中国の医療機器承認に必要な書類リストを比較説明してください',pharma:'韓国·米国·EU·日本·中国の医薬品承認に必要な書類リストを比較説明してください',food:'韓国·米国·EU·日本·中国への食品輸入登録に必要な書類リストを説明してください',cosmetic:'韓国·米国·EU·日本·中国の化粧品登録に必要な書類リストを説明してください'},
     mq:['FDA 21 CFR 820','EU MDR 2017/745','ISO 13485','ICH Q7','WHO GMP','KGMP','Codex HACCP','ISO 22000','FDA FSMA','ISO 22716','EU 1223/2009','PIC/S GMP','薬機法','食品衛生法'],
   },
-  zh:{nav_how:'工作原理',nav_chat:'法规咨询',nav_wf:'A–Z流程',nav_docs:'注册文件',nav_cov:'法规范围',nav_cta:'免费开始',
+  zh:{nav_how:'工作原理',nav_chat:'法规咨询',nav_wf:'A–Z流程',nav_docs:'注册文件',nav_cov:'法规范围',nav_cta:'开始',
     hero_eye:'Global Regulatory Intelligence Platform',
     hero_t1:'GMP\nREGULATORY',hero_t2:'Intelligence',hero_sub_word:'医疗器械 · 药品 · 食品 · 化妆品',
     hero_desc:'<strong>MFDS · FDA · EMA</strong> 官方法规文件基础平台。<br>以引用出处的三步结构提供国际GMP法规解答。',
@@ -831,7 +831,7 @@ async function sendChat(text){
   const msgs=document.getElementById('chat-msgs');
   const typ=document.getElementById('typing');
   msgs.appendChild(typ);typ.classList.add('on');msgs.scrollTop=msgs.scrollHeight;
-  const GKEY='AIzaSyDQjieqZaPZ0YjWV_S2jj1_2ZJS76u-uew';
+  const GKEY='AIzaSyBmg29S56or-D8Qt9kBpprrhodsl0hQNYE';
   const MODELS=[
     'gemini-2.0-flash-lite',
     'gemini-2.0-flash',
