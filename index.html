@@ -832,7 +832,7 @@ async function sendChat(text){
   const typ=document.getElementById('typing');
   msgs.appendChild(typ);typ.classList.add('on');msgs.scrollTop=msgs.scrollHeight;
   try{
-    const GKEY='AIzaSyALqyELQq8Pjgd0Z0orW19AUw6uyxZ9U3s';
+    const GKEY='AIzaSyDmngKLhYvvQDFGPQLSao0SaqDuaW1pqHk';
     const contents=history.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
     const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GKEY}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
