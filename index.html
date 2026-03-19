@@ -169,9 +169,6 @@ nav{
 /* CHAT BOX */
 .chat-box{background:var(--white);border:1px solid var(--rule);border-radius:14px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.12)}
 .cb-head{padding:13px 18px;border-bottom:1px solid var(--rule2);display:flex;align-items:center;gap:10px;background:var(--white)}
-.cb-actions{margin-left:auto;display:flex;gap:4px;}
-.cb-act-btn{background:none;border:1px solid var(--rule2);border-radius:6px;padding:4px 8px;font-size:13px;cursor:pointer;transition:all .15s;}
-.cb-act-btn:hover{background:var(--off2);border-color:var(--rule);}
 .cb-logo{font-family:var(--fc);font-size:16px;letter-spacing:.5px;color:var(--black)}
 .cb-logo em{color:var(--green);font-style:normal}
 .cb-badge{margin-left:auto;font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px;font-weight:400}
@@ -397,11 +394,6 @@ footer{padding:36px 48px;background:var(--black);display:flex;align-items:center
       <div class="cb-head">
         <div class="cb-logo">Global<em>Reg</em>AI</div>
         <div class="cb-badge"><span class="cb-dot"></span><span data-i18n="cb_badge"></span></div>
-        <div class="cb-actions">
-          <button class="cb-act-btn" onclick="copyChat()" title="대화 복사">📋</button>
-          <button class="cb-act-btn" onclick="printChat()" title="인쇄">🖨️</button>
-          <button class="cb-act-btn" onclick="clearChat()" title="대화 초기화">🗑️</button>
-        </div>
       </div>
       <div class="cb-tabs">
         <button class="cb-tab on" data-c="all" data-i18n="tab_all"></button>
@@ -776,9 +768,20 @@ async function sendChat(text){
   const typ=document.getElementById('typing');
   msgs.appendChild(typ);typ.classList.add('on');msgs.scrollTop=msgs.scrollHeight;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:buildSys(),messages:history})});
+    const GEMINI_KEY='AIzaSyALqyELQq8Pjgd0Z0orW19AUw6uyxZ9U3s';
+    const geminiMessages = history.map(m=>({role: m.role==='assistant'?'model':'user', parts:[{text:m.content}]}));
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        systemInstruction:{parts:[{text:buildSys()}]},
+        contents: geminiMessages,
+        generationConfig:{maxOutputTokens:1500,temperature:0.2}
+      })
+    });
     const data=await res.json();
-    const raw=data.content?.[0]?.text||'{}';
+    if(data.error){throw new Error(data.error.message);}
+    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
     history.push({role:'assistant',content:raw});
     typ.classList.remove('on');
     const bub=renderAI(raw);
@@ -788,10 +791,9 @@ async function sendChat(text){
     addMsg('ai',bub);
   }catch(e){
     typ.classList.remove('on');
-    const errMsg = e.message?.includes('Failed to fetch') ? '⚠️ 네트워크 연결을 확인해주세요.' :
-      e.message?.includes('401') ? '⚠️ API 인증 오류입니다.' :
-      e.message?.includes('429') ? '⚠️ 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' :
-      e.message?.includes('500') ? '⚠️ 서버 오류입니다. 잠시 후 다시 시도해주세요.' :
+    const errMsg=e.message?.includes('API_KEY')?'⚠️ API 키 오류입니다.':
+      e.message?.includes('quota')||e.message?.includes('429')?'⚠️ 요청 한도 초과입니다. 잠시 후 다시 시도해주세요.':
+      e.message?.includes('Failed to fetch')?'⚠️ 네트워크 연결을 확인해주세요.':
       '⚠️ 오류가 발생했습니다. 다시 시도해주세요.';
     addMsg('ai',`<span style="color:var(--red);">${errMsg}</span>`);
     history.pop();
@@ -800,33 +802,7 @@ async function sendChat(text){
   document.getElementById('chat-inp').focus();
 }
 
-function clearChat(){
-  document.getElementById('chat-msgs').innerHTML='';
-  history=[];
-  rebuildWelcome();
-}
-
-function copyChat(){
-  const msgs = document.getElementById('chat-msgs');
-  const text = Array.from(msgs.querySelectorAll('.bub')).map(b=>b.innerText).join('\n\n---\n\n');
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn = document.querySelector('[onclick="copyChat()"]');
-    btn.textContent='✅';
-    setTimeout(()=>btn.textContent='📋',2000);
-  });
-}
-
-function printChat(){
-  const msgs = document.getElementById('chat-msgs');
-  const content = msgs.innerHTML;
-  const w = window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>GlobalRegAI 대화 내용</title>
-  <style>body{font-family:'Noto Sans KR',sans-serif;max-width:800px;margin:40px auto;padding:20px;font-size:14px;line-height:1.7;}
-  .msg{margin-bottom:20px;} .msg.user{text-align:right;} </style></head>
-  <body><h2>GlobalRegAI — 규제 상담 내용</h2><hr>${content}</body></html>`);
-  w.document.close();
-  w.print();
-}
+function askDoc(c){
   scroll2('chat-section');
   const q=(T[lang].doc_q||T.ko.doc_q)[c];
   setTimeout(()=>sendChat(q),500);
