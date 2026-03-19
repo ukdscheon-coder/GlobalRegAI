@@ -36,8 +36,8 @@
   --fc:'Bebas Neue',sans-serif;
   --fm:'DM Mono',monospace;
 }
-html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--white);color:var(--ink);font-family:var(--fb);line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;font-size:17px}
+body{background:var(--white);color:var(--ink);font-family:var(--fb);line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:var(--off)}
@@ -177,10 +177,10 @@ nav{
 .cb-tab{font-family:var(--fb);font-size:12px;padding:9px 14px;color:var(--muted);border:none;background:transparent;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
 .cb-tab.on{color:var(--green);border-bottom-color:var(--green);background:var(--white)}
 .cb-tab:hover:not(.on){color:var(--black);background:var(--off2)}
-#chat-msgs{height:400px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--off)}
+#chat-msgs{height:420px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--off)}
 #chat-msgs::-webkit-scrollbar{width:2px}
 #chat-msgs::-webkit-scrollbar-thumb{background:var(--rule)}
-.msg{display:flex;gap:10px;animation:fadeUp .22s ease}
+.msg{display:flex;gap:8px;animation:fadeUp .22s ease}
 .msg.user{flex-direction:row-reverse}
 .av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
 .msg.ai .av{background:var(--green);color:var(--white);font-family:var(--fc);font-size:12px}
@@ -329,7 +329,7 @@ footer{padding:36px 48px;background:var(--black);display:flex;align-items:center
       <button class="lb" data-lang="ja">JA</button>
       <button class="lb" data-lang="zh">ZH</button>
     </div>
-    <button class="nav-cta" onclick="scroll2('chat-section')" data-i18n="nav_cta">무료로 시작하기</button>
+    <button class="nav-cta" onclick="openSubscribe()" data-i18n="nav_cta">구독 플랜 보기</button>
   </div>
 </nav>
 
@@ -528,6 +528,67 @@ footer{padding:36px 48px;background:var(--black);display:flex;align-items:center
   <div class="f-links"><a href="#" data-i18n="ft1"></a><a href="#" data-i18n="ft2"></a><a href="#" data-i18n="ft3"></a></div>
 </footer>
 
+<!-- 구독 모달 -->
+<div id="sub-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:16px;max-width:860px;width:94%;max-height:90vh;overflow-y:auto;padding:48px 40px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.3);">
+    <button onclick="closeSubscribe()" style="position:absolute;top:20px;right:24px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);">×</button>
+    <div style="text-align:center;margin-bottom:36px;">
+      <div style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--green);font-weight:500;margin-bottom:10px;">구독 플랜</div>
+      <h2 style="font-family:var(--fc);font-size:clamp(32px,5vw,52px);line-height:1;letter-spacing:.5px;margin-bottom:12px;">플랜을 선택하세요</h2>
+      <p style="font-size:14px;color:var(--muted);">모든 플랜은 MFDS·FDA·EMA 공식 문서 기반 · 출처 명시 답변을 포함합니다</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">
+      <!-- 무료 -->
+      <div style="border:1.5px solid var(--rule);border-radius:12px;padding:28px 24px;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">FREE</div>
+        <div style="font-family:var(--fc);font-size:42px;line-height:1;color:var(--black);margin-bottom:4px;">$0</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">/월</div>
+        <ul style="list-style:none;font-size:13px;color:var(--ink);line-height:2;margin-bottom:24px;">
+          <li>✓ 규정 상담 15회/일</li>
+          <li>✓ 4개 산업 분야</li>
+          <li>✓ 한국어 지원</li>
+          <li style="color:var(--muted);">✗ A-Z 워크플로우</li>
+          <li style="color:var(--muted);">✗ 허가 서류 목록</li>
+          <li style="color:var(--muted);">✗ 우선 지원</li>
+        </ul>
+        <button onclick="closeSubscribe();scroll2('chat-section')" style="width:100%;padding:12px;border:1.5px solid var(--rule);border-radius:6px;background:none;font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;color:var(--ink);">무료로 시작하기</button>
+      </div>
+      <!-- PRO -->
+      <div style="border:2px solid var(--green);border-radius:12px;padding:28px 24px;position:relative;background:var(--green-p);">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:11px;font-weight:600;padding:4px 16px;border-radius:20px;letter-spacing:1px;">인기</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:12px;">PRO</div>
+        <div style="font-family:var(--fc);font-size:42px;line-height:1;color:var(--black);margin-bottom:4px;">$29</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">/월</div>
+        <ul style="list-style:none;font-size:13px;color:var(--ink);line-height:2;margin-bottom:24px;">
+          <li>✓ 규정 상담 무제한</li>
+          <li>✓ 4개 산업 분야</li>
+          <li>✓ 4개국어 지원</li>
+          <li>✓ A-Z 워크플로우</li>
+          <li>✓ 허가 서류 목록</li>
+          <li style="color:var(--muted);">✗ 우선 지원</li>
+        </ul>
+        <button onclick="alert('준비 중입니다. 출시 알림을 받으시려면 문의해 주세요.')" style="width:100%;padding:12px;border:none;border-radius:6px;background:var(--green);color:#fff;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.02em;">PRO 시작하기 →</button>
+      </div>
+      <!-- ENTERPRISE -->
+      <div style="border:1.5px solid var(--rule);border-radius:12px;padding:28px 24px;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">ENTERPRISE</div>
+        <div style="font-family:var(--fc);font-size:42px;line-height:1;color:var(--black);margin-bottom:4px;">맞춤</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">/월</div>
+        <ul style="list-style:none;font-size:13px;color:var(--ink);line-height:2;margin-bottom:24px;">
+          <li>✓ 모든 PRO 기능</li>
+          <li>✓ 전담 규제 전문가</li>
+          <li>✓ API 연동</li>
+          <li>✓ 커스텀 규정 데이터</li>
+          <li>✓ SLA 보장</li>
+          <li>✓ 24/7 우선 지원</li>
+        </ul>
+        <button onclick="alert('문의: contact@globalregai.info')" style="width:100%;padding:12px;border:1.5px solid var(--ink);border-radius:6px;background:none;font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;color:var(--ink);">문의하기 →</button>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:28px;">모든 플랜 · 언제든지 취소 가능 · VAT 별도</p>
+  </div>
+</div>
+
 <script>
 const T={
   ko:{nav_how:'작동 방식',nav_chat:'규정 상담',nav_wf:'A–Z 워크플로우',nav_docs:'허가 서류',nav_cov:'규정 범위',nav_cta:'무료로 시작하기',
@@ -687,6 +748,9 @@ const BADGE={MFDS:'sbm',FDA:'sbf',EMA:'sbe',WHO:'sbw',ICH:'sbm',ISO:'sbm'};
 const LANG_SYS={ko:'한국어로 답변하라.',en:'Answer in English.',ja:'日本語で回答してください。',zh:'请用中文回答。'};
 
 function scroll2(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'})}
+function openSubscribe(){const m=document.getElementById('sub-modal');m.style.display='flex';}
+function closeSubscribe(){const m=document.getElementById('sub-modal');m.style.display='none';}
+document.getElementById('sub-modal')?.addEventListener('click',e=>{if(e.target===document.getElementById('sub-modal'))closeSubscribe();});
 
 function applyLang(l){
   lang=l;document.documentElement.lang=l;
@@ -768,19 +832,18 @@ async function sendChat(text){
   const typ=document.getElementById('typing');
   msgs.appendChild(typ);typ.classList.add('on');msgs.scrollTop=msgs.scrollHeight;
   try{
-    const GEMINI_KEY='AIzaSyALqyELQq8Pjgd0Z0orW19AUw6uyxZ9U3s';
-    const geminiMessages = history.map(m=>({role: m.role==='assistant'?'model':'user', parts:[{text:m.content}]}));
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+    const GKEY='AIzaSyALqyELQq8Pjgd0Z0orW19AUw6uyxZ9U3s';
+    const contents=history.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GKEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         systemInstruction:{parts:[{text:buildSys()}]},
-        contents: geminiMessages,
-        generationConfig:{maxOutputTokens:1500,temperature:0.2}
+        contents,
+        generationConfig:{maxOutputTokens:2000,temperature:0.1}
       })
     });
     const data=await res.json();
-    if(data.error){throw new Error(data.error.message);}
+    if(data.error) throw new Error(data.error.status+': '+data.error.message);
     const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
     history.push({role:'assistant',content:raw});
     typ.classList.remove('on');
@@ -791,11 +854,12 @@ async function sendChat(text){
     addMsg('ai',bub);
   }catch(e){
     typ.classList.remove('on');
-    const errMsg=e.message?.includes('API_KEY')?'⚠️ API 키 오류입니다.':
-      e.message?.includes('quota')||e.message?.includes('429')?'⚠️ 요청 한도 초과입니다. 잠시 후 다시 시도해주세요.':
-      e.message?.includes('Failed to fetch')?'⚠️ 네트워크 연결을 확인해주세요.':
-      '⚠️ 오류가 발생했습니다. 다시 시도해주세요.';
-    addMsg('ai',`<span style="color:var(--red);">${errMsg}</span>`);
+    const em=e.message||'';
+    const msg=em.includes('RESOURCE_EXHAUSTED')||em.includes('429')?'⚠️ 무료 요청 한도 초과입니다. 1분 후 다시 시도해주세요.':
+      em.includes('API_KEY')||em.includes('403')?'⚠️ API 키 오류입니다.':
+      em.includes('fetch')?'⚠️ 네트워크 오류. 페이지를 새로고침 후 시도해주세요.':
+      `⚠️ 오류: ${em}`;
+    addMsg('ai',`<span style="color:var(--red);">${msg}</span>`);
     history.pop();
   }
   document.getElementById('send-btn').disabled=false;
