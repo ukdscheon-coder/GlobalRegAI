@@ -594,34 +594,25 @@ Answer ONLY based on official regulatory documents (MFDS, FDA, EMA, WHO, ICH, IS
 Rules: [1] Official doc facts only. [2] Practical interpretation with citations. [3] Uncertain areas + next steps.
 JSON only — no markdown:
 {"sections":[{"type":"official","title":"[1] 공식 문서 근거","body":"..."},{"type":"analysis","title":"[2] 실무 적용","body":"..."},{"type":"uncertainty","title":"[3] 추가 확인 사항","body":"..."}],"sources":[{"agency":"MFDS","doc":"문서명","section":"조항","date":"YYYY-MM","status":"current"}],"disclaimer":"..."}`;
-    const GKEY='AIzaSyDrnam2h13DKF-Ef0Ycw23rrMOk6-PdMGE';
-    const MODELS=['gemini-2.0-flash-lite','gemini-2.0-flash','gemini-2.5-flash-lite','gemini-2.5-flash'];
-    async function callGemini(contents,systemText){
-      for(const model of MODELS){
-        try{
-          const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GKEY}`,{
-            method:'POST',headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({systemInstruction:{parts:[{text:systemText}]},contents,generationConfig:{maxOutputTokens:2000,temperature:0.1}})
-          });
-          const data=await res.json();
-          if(data.error){if(['NOT_FOUND','INVALID_ARGUMENT'].includes(data.error.status))continue;throw new Error(data.error.status+': '+data.error.message);}
-          return data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
-        }catch(e){if(e.message?.includes('NOT_FOUND')||e.message?.includes('INVALID_ARGUMENT'))continue;throw e;}
-      }
-      throw new Error('사용 가능한 모델이 없습니다.');
-    }
-    const contents=aiHistory.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
-    const raw=await callGemini(contents,system);
-    aiHistory.push({role:'assistant',content:raw});
+    const WORKER_URL = 'https://globalregai-worker.uk-dscheon.workers.dev';
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: aiHistory, system, lang: 'ko' })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    const raw = data.text || '{}';
+    aiHistory.push({role:'assistant', content:raw});
     typing.classList.remove('on');
     renderAIBub(raw);
   }catch(e){
     typing.classList.remove('on');
-    const em=e.message||'';
-    const msg=em.includes('RESOURCE_EXHAUSTED')||em.includes('429')?'⚠️ 무료 요청 한도 초과. 1분 후 다시 시도해주세요.':
-      em.includes('API_KEY')?'⚠️ API 키 오류입니다.':
+    const em = e.message||'';
+    const msg = em.includes('RESOURCE_EXHAUSTED')||em.includes('429') ? '⚠️ 요청 한도 초과. 잠시 후 다시 시도해주세요.' :
+      em.includes('fetch') ? '⚠️ 네트워크 오류. 새로고침 후 시도해주세요.' :
       `⚠️ 오류: ${em}`;
-    addAIMsg('ai',`<span style="color:#e74c3c;">${msg}</span>`);
+    addAIMsg('ai', `<span style="color:#e74c3c;">${msg}</span>`);
     aiHistory.pop();
   }
   send.disabled=false;
