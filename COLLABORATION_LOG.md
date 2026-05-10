@@ -68,3 +68,10 @@ GitHub: https://github.com/ukdscheon-coder/GlobalRegAI (Public, LIVE)
 4. Save and test with: MFDS 의료기기 3등급 인허가 절차를 설명해주세요
 
 ---
+
+### Codex Immediate Task Closure - 2026-05-10
+- Task 1 complete: `scripts/llm_proxy.py` now uses Docker-safe local script imports (`sys.path` + `groq_client` / `language_manager`).
+- Task 2 complete: `scripts/language_manager.py` now resolves `APP_BASE_PATH` first and falls back to the project root derived from `__file__`.
+- Task 3 complete: GitHub public repository is connected at https://github.com/ukdscheon-coder/GlobalRegAI and `main` has been integrated with the existing public web app history.
+- Verification: `py -m py_compile scripts/llm_proxy.py scripts/language_manager.py` passed.
+- Browser check: in-app browser attempted `http://localhost:3000`, but the browser surface blocked it with `net::ERR_BLOCKED_BY_CLIENT`; Docker/container status should be checked from the host browser or Docker CLI.
