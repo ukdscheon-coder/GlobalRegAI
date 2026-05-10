@@ -43,7 +43,8 @@ function App() {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-    if (!session) {
+    // Allow free usage on the basic Chat Assistant. Block PRO modules if somehow bypassed.
+    if (!session && activeModule !== 'Chat Assistant') {
       setShowAuthModal(true);
       return;
     }
@@ -226,7 +227,7 @@ function App() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={session ? `Ask ${activeModule} (Attach PDF for Auto-summary)...` : "Sign in to unlock Enterprise Modules..."}
+            placeholder={session || activeModule === 'Chat Assistant' ? `Ask ${activeModule} (Attach PDF for Auto-summary)...` : "Sign in to unlock Enterprise Modules..."}
           />
           <button className="send-btn" onClick={sendMessage}>
             <Send size={20} />
