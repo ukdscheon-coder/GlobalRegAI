@@ -1,139 +1,104 @@
-﻿# GlobalRegAI 🌍
+﻿# GlobalRegAI
 
-> **Free, Open-Source AI for Global Regulatory Affairs**  
-> Medical Devices · Pharmaceuticals · Cosmetics · Food · GMP · Audits
+Free, self-hosted regulatory AI for medical devices, pharmaceuticals, cosmetics, food, GMP, and audits.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
-[![Groq](https://img.shields.io/badge/LLM-Groq%20Llama3.3--70B-orange)](https://groq.com)
-[![Languages](https://img.shields.io/badge/Languages-5%20(KO%2FEN%2FZH%2FJA%2FES)-green)](#)
+GlobalRegAI can run locally for $0 using Groq's free API tier, Docker, Open WebUI, Qdrant, SearXNG, and n8n. The repository also contains the existing public web app assets for GitHub Pages/Supabase deployment.
 
----
+## 100% Free 24/7 Operating Model
 
-## What is GlobalRegAI?
+| Component | Paid option | Free GlobalRegAI option |
+| --- | --- | --- |
+| AI model | OpenAI GPT-4 | Groq API free tier, Llama 3.3 70B |
+| Server | AWS/Azure | Your computer with Docker |
+| Vector database | Managed DB | Qdrant local |
+| Search | Google API | SearXNG local |
+| Automation | Zapier | n8n local |
+| Code hosting | Paid Git hosting | GitHub public repo |
+| Web deploy | Paid VM | GitHub Pages / Vercel free tier |
+| Chat UI | Custom paid build | Open WebUI |
 
-GlobalRegAI is a **100% free, self-hosted AI assistant** for regulatory professionals worldwide.  
-It answers questions about regulations from FDA, EMA, MFDS, PMDA, NMPA, AEMPS, COFEPRIS, and more — in **5 languages**, automatically.
+Estimated operating cost: $0 while using the local/free stack.
 
-| Language | Agencies |
-|----------|---------|
-| 🇰🇷 Korean | MFDS (식품의약품안전처) |
-| 🇺🇸 English | FDA, EMA, TGA, Health Canada |
-| 🇨🇳 Chinese | NMPA (国家药品监督管理局) |
-| 🇯🇵 Japanese | PMDA (医薬品医療機器総合機構) |
-| 🇪🇸 Spanish | AEMPS, COFEPRIS, ANMAT, INVIMA |
+## Local Services
 
----
+| URL | Service | Role | Cost |
+| --- | --- | --- | --- |
+| http://localhost:3000 | Open WebUI | Chat interface | Free |
+| http://localhost:8000 | FastAPI Groq proxy | AI engine middleware | Free |
+| http://localhost:5678 | n8n | Automation workflows | Free |
+| http://localhost:6333 | Qdrant | RAG vector database | Free |
+| http://localhost:8080 | SearXNG | Self-hosted search | Free |
 
-## Architecture
+## 24/7 Automation
 
-```
-┌─────────────────────────────────────────────────┐
-│  Open WebUI (localhost:3000)  ─── Chat Interface │
-└───────────────┬─────────────────────────────────┘
-                │ OpenAI-compatible API
-┌───────────────▼─────────────────────────────────┐
-│  LLM Proxy (localhost:8000)  ─── FastAPI         │
-│  · Language auto-detection (KO/EN/ZH/JA/ES)      │
-│  · Regulatory terminology injection              │
-└───────────────┬─────────────────────────────────┘
-                │
-┌───────────────▼─────────────────────────────────┐
-│  Groq API  ─── Llama-3.3-70B-Versatile (FREE)   │
-└─────────────────────────────────────────────────┘
-        │               │               │
-┌───────▼──────┐ ┌──────▼──────┐ ┌─────▼──────────┐
-│ Qdrant:6333  │ │ SearXNG:8080│ │ n8n:5678       │
-│ Vector DB    │ │ Web Search  │ │ Automation     │
-│ (RAG)        │ │ (Self-hosted│ │ Workflows      │
-└──────────────┘ └─────────────┘ └────────────────┘
-```
+When the computer is on, Docker keeps the stack running with `restart: unless-stopped`.
 
----
+- Hourly: collect FDA recalls, EMA updates, and RSS regulatory news.
+- Daily at 02:00: crawl the configured regulatory sources, store new documents in Qdrant, and refresh the knowledge base.
+- Weekly on Sunday: redownload key PDFs and rebuild the vector database.
 
-## Quick Start (5 minutes)
+If the computer is turned off, local services stop. When it is turned back on, Docker restarts the services automatically. For always-on hosting later, the same stack can move to an always-free cloud VM such as Oracle Free Tier.
 
-### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac/Linux)
-- [Free Groq API Key](https://console.groq.com/keys) (takes 1 minute)
+## Quick Start
 
-### 1. Clone & Configure
+1. Copy the environment example:
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/GlobalRegAI.git
-cd GlobalRegAI
-
-# Copy and edit environment file
 cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
 ```
 
-### 2. Start All Services
+2. Add a free Groq API key to `.env`:
+
+```bash
+GROQ_API_KEY=gsk_your_groq_api_key_here
+```
+
+3. Start all local services:
+
 ```bash
 docker compose -f docker-compose.cloud.yml up -d
 ```
 
-### 3. Open the Chat Interface
-Visit **http://localhost:3000** in your browser.
+4. Open the chat UI:
 
-That's it! Ask questions in Korean, English, Chinese, Japanese, or Spanish. 🎉
-
----
-
-## Services
-
-| Service | Port | Description |
-|---------|------|-------------|
-| Open WebUI | 3000 | Chat interface (ChatGPT-like) |
-| LLM Proxy | 8000 | Multilingual FastAPI middleware |
-| n8n | 5678 | Workflow automation |
-| Qdrant | 6333 | Vector DB for RAG |
-| SearXNG | 8080 | Self-hosted web search |
-
----
-
-## Data Sources (17 Agencies)
-
-- 🇺🇸 **FDA**: openFDA API, eCFR (21 CFR Part 820/211/117/700)
-- 🌍 **ICH**: Q7, Q8, Q9, Q10, Q11, Q12, E6 guidelines
-- 🌍 **WHO**: GMP guidelines
-- 🇪🇺 **EMA**: GMP Annex 1 & 11, MDR 2017/745
-- 🇰🇷 **MFDS**: Medical device, pharmaceutical, cosmetic regulations
-- 🇯🇵 **PMDA**: Medical device and pharmaceutical guidelines
-- 🇨🇳 **NMPA**: Medical device and pharmaceutical regulations
-- 🇪🇸 **AEMPS / COFEPRIS / ANMAT**: Spain & Latin America
-- ⚗️ **REACH / RoHS / OSHA**: Chemical and electrical safety
-- 💬 **Reddit / RAPS / PubMed**: Community Q&A
-
----
-
-## Example Questions
-
-```
-🇰🇷 "MFDS 의료기기 3등급 인허가 절차를 설명해주세요"
-🇺🇸 "What are the FDA 21 CFR Part 820 QMS requirements?"
-🇪🇸 "¿Cómo registro un dispositivo médico en COFEPRIS México?"
-🇯🇵 "PMDAへの医療機器申請の流れを教えてください"
-🇨🇳 "NMPA医疗器械注册流程是什么？"
+```text
+http://localhost:3000
 ```
 
----
+5. Apply the system prompt once in Open WebUI:
 
-## Free Forever
+```text
+Admin Panel -> General -> System Prompt
+```
 
-| Component | Cost | Provider |
-|-----------|------|---------|
-| LLM (Llama 3.3 70B) | **FREE** | Groq |
-| Hosting | **FREE** | Self-hosted Docker |
-| Vector DB | **FREE** | Qdrant (self-hosted) |
-| Web Search | **FREE** | SearXNG (self-hosted) |
-| Automation | **FREE** | n8n (self-hosted) |
+Paste the contents of `config/open-webui/system_prompt.md`, then save.
 
----
+## Language Coverage
+
+| Language | Regulatory agencies |
+| --- | --- |
+| Korean | MFDS |
+| English | FDA, EMA, TGA, Health Canada |
+| Chinese | NMPA |
+| Japanese | PMDA |
+| Spanish | AEMPS, COFEPRIS, ANMAT, INVIMA |
+
+## Repository Layout
+
+| Path | Purpose |
+| --- | --- |
+| `scripts/llm_proxy.py` | OpenAI-compatible FastAPI proxy for Groq |
+| `scripts/language_manager.py` | Language detection and terminology injection |
+| `scripts/data_crawler.py` | Regulatory source crawler |
+| `scripts/auto_scheduler.py` | 24/7 local automation scheduler |
+| `config/open-webui/system_prompt.md` | Regulatory expert system prompt |
+| `n8n-workflows/` | Importable n8n workflow JSON files |
+| `src/`, `public/`, `supabase/` | Existing public web app and Supabase assets |
+
+## GitHub / Web Deployment
+
+The local Docker stack is the free 24/7 workstation version. The existing frontend can also be deployed from GitHub using the repository's web app files and free hosting options such as GitHub Pages or Vercel.
 
 ## License
 
-MIT License — free to use, modify, and distribute commercially.
-
----
-
-*Built with ❤️ for the global regulatory community*
+MIT License.

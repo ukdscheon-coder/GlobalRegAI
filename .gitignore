@@ -1,4 +1,4 @@
-# Secrets - NEVER commit
+﻿# Secrets - NEVER commit
 .env
 .env.*
 !.env.example
@@ -15,7 +15,7 @@ build/
 .venv/
 venv/
 
-# Data & Downloads (too large / auto-generated)
+# Data & downloads - generated locally
 data/
 downloads/
 *.pdf
@@ -31,10 +31,15 @@ logs/
 Thumbs.db
 desktop.ini
 
-# Node
+# Node / web builds
 node_modules/
+dist/
+dist-electron/
 .next/
 out/
 
-# Docker volumes (local only)
+# Docker local volumes
 volumes/
+
+# Supabase local metadata
+supabase/.temp/
