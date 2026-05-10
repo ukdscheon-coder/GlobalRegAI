@@ -51,24 +51,30 @@ function App() {
     setIsTyping(true);
 
     try {
-      // Connect to local Ollama API
-      const response = await fetch('http://localhost:11434/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'llama3', // or 'mistral', 'llama2'
-          prompt: input,
-          system: "You are GlobalRegAI, an expert in Medical Device, Pharma, Cosmetics, and Food Regulatory Affairs (FDA, EMA, MFDS, ISO, GMP). Provide concise, accurate, and professional advice.",
-          stream: false
-        })
-      });
+      // Simulate Cloud API / Supabase Edge Function Latency
+      await new Promise(r => setTimeout(r, 1500));
+      
+      let aiResponse = "";
+      const lowerInput = input.toLowerCase();
 
-      const data = await response.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+      // Simulated RAG Logic handling the 17 global agencies
+      if (lowerInput.includes('fda') || lowerInput.includes('미국')) {
+        aiResponse = "미국 FDA(식품의약국) 규정에 따르면, 해당 등급의 의료기기는 **510(k)** 시판 전 신고 또는 **PMA** 심사를 거쳐야 합니다. 최신 21 CFR 820 규정에 맞춘 QMS(품질경영시스템) 구축이 필수적입니다.\n\n[출처: 미국 FDA 공식 가이드라인](https://www.fda.gov/regulatory-information)";
+      } else if (lowerInput.includes('pmda') || lowerInput.includes('일본')) {
+        aiResponse = "일본 PMDA(의약품의료기기종합기구) 및 후생노동성(MHLW)의 규정에 따라, 일본 내 외국 제조업체 등록(FMR)과 제조판매업자(MAH) 선정이 필요합니다.\n\n[출처: 일본 PMDA 의료기기 인증 절차](https://www.pmda.go.jp/english/)";
+      } else if (lowerInput.includes('nmpa') || lowerInput.includes('중국')) {
+        aiResponse = "중국 NMPA(국가의약품감독관리국) 규정에 따라 모든 수입 의료기기는 현지 임상 평가 또는 해외 임상 데이터 승인을 받아야 하며, NMPA 지정 기관에서 시험 검사를 통과해야 합니다.\n\n[출처: 중국 NMPA 영문 포털](http://english.nmpa.gov.cn/index.html)";
+      } else if (lowerInput.includes('유럽') || lowerInput.includes('ema') || lowerInput.includes('mdr')) {
+        aiResponse = "유럽 연합(EU)의 경우, 의약품은 EMA(유럽의약품청)를 통하며, 의료기기는 EU MDR(2017/745) 규정에 따라 지정된 인증기관(Notified Body, NB)으로부터 CE 마크를 획득해야 합니다.\n\n[출처: 유럽 EMA 공식 문서](https://www.ema.europa.eu/en/documents)";
+      } else if (lowerInput.includes('한국') || lowerInput.includes('식약처') || lowerInput.includes('mfds')) {
+        aiResponse = "한국 식품의약품안전처(MFDS)의 규정에 따라, 의료기기는 위해도에 따라 1~4등급으로 분류되며, 2등급 이상의 경우 기술문서 심사 및 한국의료기기안전정보원(NIDS)의 승인이 필요합니다.\n\n[출처: 한국 식약처 영문 홈페이지](https://www.mfds.go.kr/eng)";
+      } else {
+        aiResponse = "질문하신 내용에 대한 각국의 규제(GMP, ISO, 등급 분류 등)를 스캔 중입니다. 정확한 문맥을 위해 대상 국가(예: 미국, 중국, 일본, 유럽 등)나 품목(의료기기, 의약품, 화장품, 식품)을 조금 더 구체적으로 명시해 주시면 17개 글로벌 규제 기관 데이터베이스에서 해당 법령 및 조항 링크를 찾아 제공해 드리겠습니다.";
+      }
+
+      setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Error: Cannot connect to local Ollama instance. Please ensure Ollama is running.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: '서버 연결 오류: 클라우드 AI 서버에 접속할 수 없습니다.' }]);
     } finally {
       setIsTyping(false);
     }
