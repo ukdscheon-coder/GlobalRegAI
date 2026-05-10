@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Settings, Database, Activity, Map, LogOut, Globe, Sun, Moon, Search, Layers, ShieldAlert, FileText, Clock, Box, Bell, Users, FileCheck, Share2, Paperclip, QrCode } from 'lucide-react';
+import { Send, Database, Activity, LogOut, Globe, Sun, Moon, Search, Layers, ShieldAlert, FileText, Clock, Box, Bell, Users, FileCheck, Share2, Paperclip, QrCode } from 'lucide-react';
 import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
