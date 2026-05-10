@@ -95,3 +95,20 @@ services:
       - "8080:8080"
     volumes:
       - ./config/searxng:/etc/searxng
+
+  # ── 6. Cosmos-AI ── Central Control Tower (Port 8788) ──────
+  cosmos-ai:
+    image: node:20-slim
+    container_name: cosmos-ai-control
+    restart: unless-stopped
+    networks:
+      - globalregai
+    ports:
+      - "8788:8788"
+    volumes:
+      # Cosmos-AI 소스 코드 및 데이터 연결
+      - C:/Users/laser/Documents/Codex/2026-05-10/connect-ai-24-local-ai-tool/Cosmos-AI:/app
+    working_dir: /app
+    command: node src/server.js
+    depends_on:
+      - llm-proxy

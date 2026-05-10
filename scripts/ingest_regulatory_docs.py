@@ -111,6 +111,74 @@ REGULATORY_SOURCES = [
         "type": "regulation"
     },
 
+    # ── AEMPS (Spain — Agencia Española de Medicamentos) ────
+    {
+        "agency": "AEMPS",
+        "category": "Medical Device",
+        "title": "Regulación de Productos Sanitarios en España",
+        "url": "https://www.aemps.gob.es/productos-sanitarios/regulacion-de-productos-sanitarios/",
+        "type": "regulation"
+    },
+    {
+        "agency": "AEMPS",
+        "category": "Pharmaceutical",
+        "title": "Guía de Normas de Correcta Fabricación (GMP)",
+        "url": "https://www.aemps.gob.es/industria-farmaceutica/inspeccion-de-normas-de-correcta-fabricacion/",
+        "type": "guidance"
+    },
+
+    # ── COFEPRIS (Mexico) ────────────────────────────────────
+    {
+        "agency": "COFEPRIS",
+        "category": "General",
+        "title": "Marco Jurídico de Dispositivos Médicos",
+        "url": "https://www.gob.mx/cofepris/acciones-y-programas/dispositivos-medicos-32115",
+        "type": "regulation"
+    },
+
+    # ── ANMAT (Argentina) ────────────────────────────────────
+    {
+        "agency": "ANMAT",
+        "category": "Pharmaceutical",
+        "title": "Normativas de Medicamentos",
+        "url": "https://www.argentina.gob.ar/anmat/regulados/medicamentos/normativas",
+        "type": "regulation"
+    },
+    {
+        "agency": "ANMAT",
+        "category": "Food",
+        "title": "Código Alimentario Argentino",
+        "url": "https://www.argentina.gob.ar/anmat/codigoalimentario",
+        "type": "regulation"
+    },
+
+    # ── ISP (Chile) ──────────────────────────────────────────
+    {
+        "agency": "ISP",
+        "category": "Medical Device",
+        "title": "Regulación de Dispositivos Médicos en Chile",
+        "url": "https://www.ispch.cl/prestacion/dispositivos-medicos/",
+        "type": "regulation"
+    },
+
+    # ── INVIMA (Colombia) ────────────────────────────────────
+    {
+        "agency": "INVIMA",
+        "category": "General",
+        "title": "Normatividad y Trámites",
+        "url": "https://www.invima.gov.co/normatividad",
+        "type": "regulation"
+    },
+
+    # ── DIGEMID (Peru) ───────────────────────────────────────
+    {
+        "agency": "DIGEMID",
+        "category": "Pharmaceutical",
+        "title": "Marco Normativo de Medicamentos",
+        "url": "http://www.digemid.minsa.gob.pe/Main.asp?Seccion=3",
+        "type": "regulation"
+    },
+
     # ── ISO Standards (publicly available summaries) ─────────
     {
         "agency": "ISO",
@@ -489,10 +557,63 @@ CAPA TEMPLATE:
 8. Sign-off and Close-out
 """,
     },
+    {
+        "agency": "AEMPS",
+        "category": "Medical Device",
+        "title": "Requisitos para Productos Sanitarios en España (AEMPS)",
+        "content": """
+AEMPS (España) — Requisitos para Productos Sanitarios:
+
+CLASIFICACIÓN (Reglamento UE 2017/745):
+- Clase I: Bajo riesgo
+- Clase IIa: Riesgo moderado
+- Clase IIb: Riesgo potencial
+- Clase III: Alto riesgo
+
+PROCEDIMIENTOS CLAVE:
+1. Declaración de Conformidad CE
+2. Evaluación por Organismo Notificado (salvo Clase I)
+3. Marcado CE obligatorio
+4. Registro en la base de datos EUDAMED
+5. Comunicación de comercialización a la AEMPS
+
+REQUISITOS DEL SISTEMA DE CALIDAD:
+- ISO 13485:2016 es el estándar de referencia
+- Gestión de riesgos (ISO 14971)
+- Vigilancia post-comercialización
+- Designación de Persona Responsable del cumplimiento normativo (PRRC)
+""",
+    },
+    {
+        "agency": "COFEPRIS",
+        "category": "Pharmaceutical",
+        "title": "Buenas Prácticas de Fabricación en México (NOM-059-SSA1)",
+        "content": """
+COFEPRIS (México) — NOM-059-SSA1-2015 Buenas Prácticas de Fabricación:
+
+OBJETIVO: Establecer los requisitos mínimos necesarios para el proceso de fabricación de los medicamentos para uso humano comercializados en el país.
+
+SISTEMA DE GESTIÓN DE CALIDAD:
+- Gestión de riesgos de calidad
+- Manual de Calidad
+- Auditorías internas 및 a proveedores
+- CAPA (Acciones Correctivas 및 Preventivas)
+
+PERSONAL:
+- Organigrama actualizado
+- Responsable Sanitario con perfil profesional
+- Capacitación continua documentada
+
+INSTALACIONES Y EQUIPOS:
+- Calificación 및 validación (IQ/OQ/PQ)
+- Mantenimiento preventivo
+- Control de áreas limpias (Clasificación ISO)
+""",
+    },
 ]
 
 
-def chunk_text(text: str, size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP):
+def chunk_text(text: str, size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list:
     """Split text into overlapping chunks."""
     chunks = []
     start = 0
