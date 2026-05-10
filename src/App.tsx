@@ -56,6 +56,7 @@ function App() {
     setInput('');
     setIsTyping(true);
 
+    try {
       const disclaimer = `\n\n> **[시스템] Anti-Hallucination 검증 완료**: 위 답변은 실제 규제 지침을 참고하여 작성되었습니다. (Live AI Mode)`;
 
       if (apiKey) {
