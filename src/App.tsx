@@ -1,10 +1,35 @@
-import { useState } from 'react';
-import { Send, Settings, Database, Activity, Map } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Send, Settings, Database, Activity, Map, LogOut } from 'lucide-react';
+import Auth from './components/Auth';
+import { supabase } from './lib/supabase';
 
 function App() {
   const [messages, setMessages] = useState([{ role: 'system', content: 'Welcome to GlobalRegAI. How can I assist you with regulatory affairs today?' }]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  if (!session) {
+    return <Auth onLogin={() => {}} />;
+  }
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -64,11 +89,15 @@ function App() {
             <Settings size={20} />
             <span>Settings</span>
           </button>
+          <button className="nav-item" onClick={handleLogout} style={{ marginTop: 'auto', color: '#ef4444' }}>
+            <LogOut size={20} />
+            <span>Sign Out</span>
+          </button>
         </nav>
 
         <div className="status-indicator">
           <div className="dot online"></div>
-          <span>Local Engine: Ready</span>
+          <span>Cloud DB: Connected</span>
         </div>
       </aside>
 
