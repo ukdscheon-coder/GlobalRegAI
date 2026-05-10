@@ -95,7 +95,7 @@ function App() {
         }
       } else {
         // API 키가 없을 때의 기존 하드코딩 Fallback 로직 (데모용)
-
+      const lowerInput = input.toLowerCase();
       // 1. Keyword Extraction
       const isKorea = lowerInput.match(/한국|식약처|mfds|korea/);
       const isUS = lowerInput.match(/미국|fda|usa|us/);
