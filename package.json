@@ -1,7 +1,7 @@
 {
   "name": "globalregai",
   "private": true,
-  "homepage": "https://www.globalregai.info",
+  "homepage": "https://globalregai.info",
   "version": "1.0.0",
   "main": "electron/main.js",
   "scripts": {

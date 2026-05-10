@@ -4,10 +4,11 @@ import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
 function App() {
-  const [messages, setMessages] = useState([{ role: 'system', content: 'Welcome to GlobalRegAI. How can I assist you with regulatory affairs today?' }]);
+  const [messages, setMessages] = useState([{ role: 'system', content: 'Welcome to GlobalRegAI. How can I assist you with regulatory affairs today? Feel free to ask a question!' }]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -18,6 +19,7 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) setShowAuthModal(false);
     });
 
     return () => subscription.unsubscribe();
@@ -27,14 +29,14 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  if (!session) {
-    return <Auth onLogin={() => {}} />;
-  }
-
-  const isAdmin = session.user?.email === 'uk.dscheon@gmail.com';
+  const isAdmin = session?.user?.email === 'uk.dscheon@gmail.com';
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+    if (!session) {
+      setShowAuthModal(true);
+      return;
+    }
     
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -79,27 +81,34 @@ function App() {
             <Send size={20} />
             <span>Chat Assistant</span>
           </button>
-          <button className="nav-item">
+          <button className="nav-item" onClick={() => !session && setShowAuthModal(true)}>
             <Database size={20} />
             <span>Knowledge Base</span>
           </button>
-          <button className="nav-item">
+          <button className="nav-item" onClick={() => !session && setShowAuthModal(true)}>
             <Map size={20} />
             <span>Global Regulations</span>
           </button>
-          <button className="nav-item">
+          <button className="nav-item" onClick={() => !session && setShowAuthModal(true)}>
             <Settings size={20} />
             <span>Settings</span>
           </button>
-          <button className="nav-item" onClick={handleLogout} style={{ marginTop: 'auto', color: '#ef4444' }}>
-            <LogOut size={20} />
-            <span>Sign Out</span>
-          </button>
+          {session ? (
+            <button className="nav-item" onClick={handleLogout} style={{ marginTop: 'auto', color: '#ef4444' }}>
+              <LogOut size={20} />
+              <span>Sign Out</span>
+            </button>
+          ) : (
+            <button className="nav-item" onClick={() => setShowAuthModal(true)} style={{ marginTop: 'auto', color: '#3b82f6', border: '1px solid #3b82f6' }}>
+              <LogOut size={20} style={{transform: 'rotate(180deg)'}} />
+              <span>Sign In / Sign Up</span>
+            </button>
+          )}
         </nav>
 
         <div className="status-indicator">
           <div className="dot online"></div>
-          <span>Cloud DB: Connected</span>
+          <span>{session ? 'Cloud DB: Connected' : 'Guest Mode (View Only)'}</span>
         </div>
       </aside>
 
@@ -139,13 +148,24 @@ function App() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask about FDA 510(k), ISO 13485, or EMA guidelines..." 
+            placeholder={session ? "Ask about FDA 510(k), ISO 13485, or EMA guidelines..." : "Sign in to start asking questions..."}
           />
           <button className="send-btn" onClick={sendMessage}>
             <Send size={20} />
           </button>
         </div>
       </main>
+
+      {/* Auth Modal Overlay */}
+      {showAuthModal && (
+        <div className="modal-overlay">
+          <div className="modal-close-bg" onClick={() => setShowAuthModal(false)}></div>
+          <div className="modal-content">
+            <button className="modal-close-btn" onClick={() => setShowAuthModal(false)}>✕</button>
+            <Auth onLogin={() => setShowAuthModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
