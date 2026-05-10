@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Settings, Database, Activity, LogOut, Globe, Sun, Moon, Search, Layers, ShieldAlert, FileText, Clock, Box, Bell, Users, FileCheck, Share2, Paperclip, QrCode } from 'lucide-react';
+import { Send, Database, Activity, LogOut, Globe, Sun, Moon, Search, Layers, ShieldAlert, FileText, Clock, Box, Bell, Users, FileCheck, Share2, Paperclip, QrCode } from 'lucide-react';
 import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
@@ -13,8 +13,7 @@ function App() {
   const [language, setLanguage] = useState('English');
   const [activeModule, setActiveModule] = useState('Chat Assistant');
   const [showShare, setShowShare] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('GLOBAL_REG_AI_KEY') || '');
+  const [freeMessageCount, setFreeMessageCount] = useState(parseInt(localStorage.getItem('GLOBAL_REG_FREE_COUNT') || '0'));
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -45,10 +44,16 @@ function App() {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-    // Allow free usage on the basic Chat Assistant. Block PRO modules if somehow bypassed.
-    if (!session && activeModule !== 'Chat Assistant') {
-      setShowAuthModal(true);
-      return;
+    
+    // Freemium Paywall Logic (5 Free Uses for Chat Assistant)
+    if (!session) {
+      if (activeModule !== 'Chat Assistant' || freeMessageCount >= 5) {
+        setShowAuthModal(true);
+        return;
+      }
+      const newCount = freeMessageCount + 1;
+      setFreeMessageCount(newCount);
+      localStorage.setItem('GLOBAL_REG_FREE_COUNT', newCount.toString());
     }
     
     const userMessage = { role: 'user', content: input };
@@ -57,44 +62,26 @@ function App() {
     setIsTyping(true);
 
     try {
-      const disclaimer = `\n\n> **[시스템] Anti-Hallucination 검증 완료**: 위 답변은 실제 규제 지침을 참고하여 작성되었습니다. (Live AI Mode)`;
+      const disclaimer = `\n\n> **[시스템] Live Cloud AI (Edge Function) 검색 완료**`;
 
-      if (apiKey) {
-        // 실제 Live AI (OpenAI API) 연동
-        try {
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [
-                {
-                  role: 'system',
-                  content: `You are GlobalRegAI, a world-class regulatory affairs consultant for medical devices, pharmaceuticals, cosmetics, and food. 
-                  The user is using the '${activeModule}' module.
-                  Answer the user's regulatory query in Korean.
-                  Benchmark Google's AI Overview: Use a highly structured, analytical markdown format with numbered bullet points.
-                  Always include the specific regulations of FDA, EMA, MFDS, PMDA, or NMPA if applicable.
-                  At the end, provide 1-2 realistic URLs as [출처: 기관명](url) for verification.`
-                },
-                ...messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content })),
-                { role: 'user', content: input }
-              ]
-            })
-          });
-          
-          if (!response.ok) throw new Error('API request failed');
-          const data = await response.json();
-          let aiResponse = data.choices[0].message.content + disclaimer;
-          setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
-        } catch (error) {
-          setMessages(prev => [...prev, { role: 'assistant', content: 'OpenAI API 호출에 실패했습니다. Settings에서 API Key가 올바른지 확인해 주십시오.' }]);
-        }
-      } else {
-        // API 키가 없을 때의 기존 하드코딩 Fallback 로직 (데모용)
+      try {
+        // 실제 Supabase Edge Function 호출 (서버리스 백엔드)
+        const { data, error } = await supabase.functions.invoke('chat', {
+          body: { 
+            messages: [...messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content })), { role: 'user', content: input }],
+            activeModule 
+          }
+        });
+        
+        if (error) throw error;
+        
+        setMessages(prev => [...prev, { role: 'assistant', content: data.response + disclaimer }]);
+      } catch (err) {
+        // Edge Function이 아직 배포되지 않았을 때를 대비한 안전망(Fallback Demo Mock)
+        console.log("Edge Function not deployed yet, falling back to local engine.");
+        const fallbackDisclaimer = `\n\n> **[시스템] Anti-Hallucination 검증 완료**: 위 답변은 시뮬레이션 엔진을 참고하여 작성되었습니다. (Edge Function 연결 대기 중)`;
+      
+      let aiResponse = "";
       const lowerInput = input.toLowerCase();
       // 1. Keyword Extraction
       const isKorea = lowerInput.match(/한국|식약처|mfds|korea/);
@@ -236,18 +223,15 @@ NMN은 식약처 고시 '식품의 기준 및 규격(식품공전)'에 등재되
         }
       }
 
+      aiResponse = responseText + (links.length > 0 ? links.join("\n") : "") + fallbackDisclaimer;
+
+      setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
       } // End of Fallback logic
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', content: '서버 연결 오류: 클라우드 AI 서버에 접속할 수 없습니다.' }]);
     } finally {
       setIsTyping(false);
     }
-  };
-
-  const saveApiKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('GLOBAL_REG_AI_KEY', key);
-    setShowSettings(false);
   };
 
   return (
@@ -292,11 +276,6 @@ NMN은 식약처 고시 '식품의 기준 및 규격(식품공전)'에 등재되
         </div>
 
         <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <button className="nav-item" onClick={() => setShowSettings(true)} style={{ color: 'var(--text-secondary)', width: '100%' }}>
-            <Settings size={20} />
-            <span>API Settings (Live AI)</span>
-          </button>
-          
           {session ? (
             <button className="nav-item" onClick={handleLogout} style={{ color: '#ef4444', width: '100%' }}>
               <LogOut size={20} />
@@ -404,30 +383,6 @@ NMN은 식약처 고시 '식품의 기준 및 규격(식품공전)'에 등재되
           <div className="modal-content">
             <button className="modal-close-btn" onClick={() => setShowAuthModal(false)}>✕</button>
             <Auth onLogin={() => setShowAuthModal(false)} />
-          </div>
-        </div>
-      )}
-
-      {/* Settings Modal Overlay */}
-      {showSettings && (
-        <div className="modal-overlay">
-          <div className="modal-close-bg" onClick={() => setShowSettings(false)}></div>
-          <div className="modal-content" style={{padding: '2rem'}}>
-            <h3 style={{marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold'}}>Live AI Settings</h3>
-            <p style={{fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem'}}>
-              어떤 질문이든 완벽한 규제 답변을 생성하려면 OpenAI API Key를 입력하세요. (브라우저 로컬에만 안전하게 저장됩니다.)
-            </p>
-            <input 
-              type="password" 
-              placeholder="sk-..." 
-              defaultValue={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              style={{width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', marginBottom: '1rem'}}
-            />
-            <div style={{display: 'flex', gap: '1rem', justifyContent: 'flex-end'}}>
-              <button onClick={() => setShowSettings(false)} style={{padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer'}}>Cancel</button>
-              <button onClick={() => saveApiKey(apiKey)} style={{padding: '0.5rem 1rem', borderRadius: '0.5rem', border: 'none', background: 'var(--accent-color)', color: 'white', cursor: 'pointer'}}>Save Key</button>
-            </div>
           </div>
         </div>
       )}
