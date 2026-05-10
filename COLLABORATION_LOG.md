@@ -75,3 +75,9 @@ GitHub: https://github.com/ukdscheon-coder/GlobalRegAI (Public, LIVE)
 - Task 3 complete: GitHub public repository is connected at https://github.com/ukdscheon-coder/GlobalRegAI and `main` has been integrated with the existing public web app history.
 - Verification: `py -m py_compile scripts/llm_proxy.py scripts/language_manager.py` passed.
 - Browser check: in-app browser attempted `http://localhost:3000`, but the browser surface blocked it with `net::ERR_BLOCKED_BY_CLIENT`; Docker/container status should be checked from the host browser or Docker CLI.
+
+### Codex Relay to Claude local - 2026-05-10
+- Instruction from user: All reports must be left on the dashboard running on port 8788.
+- Claude local should collaborate with Antigravity through the 8788 Command Center and its `agents_chat.json` channel.
+- Operational rule: do not scatter status updates across private chat only; every RAG, n8n, prompt, crawler, and deployment result should be mirrored to the 8788 dashboard.
+- Current observation: `http://localhost:8788` was not reachable from Codex at relay time, so this instruction is recorded here and in `agents_chat.json` for Antigravity/Claude pickup.

@@ -1,0 +1,32 @@
+﻿{
+    "schema_version":  "1.0",
+    "project":  "GlobalRegAI",
+    "channel":  "cosmos-ai-command-center",
+    "port":  8788,
+    "created_at":  "2026-05-10T15:45:00+01:00",
+    "messages":  [
+                     {
+                         "id":  "codex-relay-2026-05-10-001",
+                         "from":  "Codex",
+                         "to":  [
+                                    "Claude local",
+                                    "Antigravity"
+                                ],
+                         "priority":  "high",
+                         "status":  "posted",
+                         "title":  "Route all reporting through port 8788 dashboard",
+                         "body":  "User instruction: 모든 보고는 8788 포트의 대시보드에 남기고 Antigravity와 협업해. Claude local should coordinate with Antigravity through the Cosmos-AI Command Center dashboard and agents_chat.json. Mirror RAG, n8n, system prompt, crawler, deployment, and incident reports to the 8788 dashboard.",
+                         "action_items":  [
+                                              "Claude local: prepare Qdrant RAG collection and report progress to the 8788 dashboard.",
+                                              "Claude local: write n8n workflow registration guide and report completion to the 8788 dashboard.",
+                                              "Claude local: document Open WebUI system prompt application and report completion to the 8788 dashboard.",
+                                              "Antigravity: ensure Cosmos-AI Command Center on port 8788 is running and reading agents_chat.json."
+                                          ],
+                         "observed_by_codex":  {
+                                                   "reachable":  false,
+                                                   "dashboard_url":  "http://localhost:8788",
+                                                   "note":  "Codex could not connect to port 8788 at relay time."
+                                               }
+                     }
+                 ]
+}
