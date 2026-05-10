@@ -31,6 +31,8 @@ function App() {
     return <Auth onLogin={() => {}} />;
   }
 
+  const isAdmin = session.user?.email === 'uk.dscheon@gmail.com';
+
   const sendMessage = async () => {
     if (!input.trim()) return;
     
@@ -104,8 +106,14 @@ function App() {
       {/* Main Chat Area */}
       <main className="chat-area">
         <header className="chat-header">
-          <h2>Regulatory Assistant</h2>
-          <span className="badge">100% Local & Free</span>
+          <h2>Regulatory Assistant {isAdmin && <span style={{color: '#f59e0b', fontSize: '0.875rem', marginLeft: '0.5rem'}}>[ADMIN]</span>}</h2>
+          <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
+            {isAdmin ? (
+              <span className="badge" style={{backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.2)'}}>Free Access (Admin)</span>
+            ) : (
+              <span className="badge">Professional Plan</span>
+            )}
+          </div>
         </header>
         
         <div className="messages">
