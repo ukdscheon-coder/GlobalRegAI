@@ -1,0 +1,83 @@
+{
+  "name": "GlobalRegAI — GMP Audit Checklist Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gmp-audit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "gmp-audit-checklist"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "prompt": "=You are GlobalRegAI, a GMP regulatory expert.\n\nGenerate a comprehensive GMP audit checklist for:\n- Facility Type: {{ $json.facility_type }}\n- Regulatory Framework: {{ $json.framework }}\n- Product Category: {{ $json.product_category }}\n- Audit Scope: {{ $json.scope }}\n\nFormat the checklist as structured JSON with:\n1. Section name\n2. Checklist items (each with: requirement, reference, risk_level, document_required)\n3. Scoring criteria\n\nProvide practical, actionable items based on FDA/ISO/EU GMP requirements.",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "ollama-generate",
+      "name": "Generate Checklist (Ollama)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://ollama:11434/api/generate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "llama3.2:3b"
+            },
+            {
+              "name": "prompt",
+              "value": "=You are GlobalRegAI, a GMP regulatory expert.\n\nGenerate a comprehensive GMP audit checklist for:\n- Facility Type: {{ $json.body.facility_type }}\n- Regulatory Framework: {{ $json.body.framework }}\n- Product Category: {{ $json.body.product_category }}\n\nProvide a structured checklist with sections: Quality Management System, Documentation, Personnel, Premises & Equipment, Production, Quality Control, CAPA. For each item include: requirement description, regulatory reference, and risk level (Critical/Major/Minor)."
+            },
+            {
+              "name": "stream",
+              "value": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { checklist: $json.response, generated_at: new Date().toISOString(), framework: $('Webhook Trigger').item.json.body.framework } }}"
+      },
+      "id": "respond",
+      "name": "Return Checklist",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [{ "node": "Generate Checklist (Ollama)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Generate Checklist (Ollama)": {
+      "main": [
+        [{ "node": "Return Checklist", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "description": "Generates GMP audit checklists for FDA/ISO/EU frameworks via POST /webhook/gmp-audit"
+  }
+}

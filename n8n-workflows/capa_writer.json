@@ -1,0 +1,63 @@
+{
+  "name": "GlobalRegAI — CAPA Report Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-capa",
+        "responseMode": "responseNode"
+      },
+      "id": "capa-webhook",
+      "name": "CAPA Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "generate-capa"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/generate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "model", "value": "llama3.2:3b" },
+            {
+              "name": "prompt",
+              "value": "=You are a regulatory affairs expert specializing in CAPA (Corrective and Preventive Action) reports.\n\nGenerate a complete CAPA report for the following finding:\n\nFinding Type: {{ $json.body.finding_type }}\nDescription: {{ $json.body.description }}\nAffected Area: {{ $json.body.area }}\nRegulatory Framework: {{ $json.body.framework }}\nFinding Classification: {{ $json.body.classification }}\n\nProvide a complete CAPA report with:\n1. PROBLEM STATEMENT — clear description of the nonconformance\n2. IMMEDIATE CONTAINMENT — actions taken right away\n3. ROOT CAUSE ANALYSIS — 5-Why analysis\n4. CORRECTIVE ACTIONS — specific actions to fix the root cause\n5. PREVENTIVE ACTIONS — systemic changes to prevent recurrence\n6. IMPLEMENTATION PLAN — timeline with responsibilities\n7. EFFECTIVENESS VERIFICATION — how will you confirm it worked?\n8. REGULATORY REFERENCE — applicable regulation/standard\n\nBe specific, measurable, and time-bound."
+            },
+            { "name": "stream", "value": false }
+          ]
+        }
+      },
+      "id": "generate-capa",
+      "name": "Generate CAPA (Ollama)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { capa_report: $json.response, generated_at: new Date().toISOString(), finding: $('CAPA Request').item.json.body.description } }}"
+      },
+      "id": "capa-response",
+      "name": "Return CAPA Report",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "CAPA Request": {
+      "main": [[{ "node": "Generate CAPA (Ollama)", "type": "main", "index": 0 }]]
+    },
+    "Generate CAPA (Ollama)": {
+      "main": [[{ "node": "Return CAPA Report", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "description": "Generates complete CAPA reports via POST /webhook/generate-capa"
+  }
+}

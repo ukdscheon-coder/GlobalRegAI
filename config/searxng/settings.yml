@@ -1,0 +1,76 @@
+# SearXNG Configuration for GlobalRegAI
+# Optimized to search regulatory databases
+
+use_default_settings: true
+
+general:
+  instance_name: "GlobalRegAI Search"
+  privacypolicy_url: false
+  contact_url: false
+  enable_metrics: false
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "en"
+  formats:
+    - html
+    - json
+
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+  secret_key: "globalregai-searxng-secret"
+  base_url: "http://localhost:8080/"
+  limiter: false
+  public_instance: false
+
+ui:
+  static_use_hash: true
+  default_locale: "en"
+  query_in_title: true
+  infinite_scroll: true
+  center_alignment: false
+  default_theme: simple
+  theme_args:
+    simple_style: dark
+
+# Regulatory-focused search engines
+engines:
+  - name: google
+    engine: google
+    shortcut: g
+    use_mobile_ui: false
+
+  - name: bing
+    engine: bing
+    shortcut: b
+
+  - name: pubmed
+    engine: pubmed
+    shortcut: pub
+    categories: science
+    timeout: 10.0
+
+  - name: arxiv
+    engine: arxiv
+    shortcut: ax
+    categories: science
+
+  - name: github
+    engine: github
+    shortcut: gh
+    categories: it
+
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wp
+    categories: general
+
+categories_as_tabs:
+  general:
+    - general
+  science:
+    - science
+  it:
+    - it

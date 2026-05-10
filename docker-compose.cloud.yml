@@ -1,0 +1,99 @@
+version: "3.9"
+
+networks:
+  globalregai:
+    driver: bridge
+
+volumes:
+  openwebui_data:
+  n8n_data:
+  qdrant_data:
+  searxng_data:
+
+services:
+
+  # ── 1. LLM Proxy ── Intelligent Multilingual Middleware ─────
+  llm-proxy:
+    image: python:3.10-slim
+    container_name: globalregai-proxy
+    restart: unless-stopped
+    networks:
+      - globalregai
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+      - DEFAULT_MODEL=llama-3.3-70b-versatile
+    command: >
+      sh -c "pip install fastapi uvicorn requests python-dotenv &&
+             python scripts/llm_proxy.py"
+
+  # ── 2. Open WebUI ───────────────────────────────────────────
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: globalregai-webui
+    restart: unless-stopped
+    networks:
+      - globalregai
+    ports:
+      - "3000:8080"
+    volumes:
+      - openwebui_data:/app/backend/data
+    env_file:
+      - .env
+    environment:
+      # 프록시 서버를 OpenAI 호환 엔드포인트로 설정
+      - OPENAI_API_BASE_URL=http://llm-proxy:8000/v1
+      - OPENAI_API_KEY=not-needed-proxy-handles-it
+      - WEBUI_NAME=GlobalRegAI (Cloud)
+      - WEBUI_AUTH=false
+      - ENABLE_RAG_WEB_SEARCH=true
+      - RAG_WEB_SEARCH_ENGINE=searxng
+      - SEARXNG_QUERY_URL=http://searxng:8080/search?q=<query>&format=json
+      - VECTOR_DB=qdrant
+      - QDRANT_URI=http://qdrant:6333
+    depends_on:
+      - llm-proxy
+
+  # ── 3. n8n ──────────────────────────────────────────────────
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: globalregai-n8n
+    restart: unless-stopped
+    networks:
+      - globalregai
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    environment:
+      - N8N_USER_MANAGEMENT_DISABLED=true
+
+  # ── 4. Qdrant ───────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: globalregai-qdrant
+    restart: unless-stopped
+    networks:
+      - globalregai
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  # ── 5. SearXNG ──────────────────────────────────────────────
+  searxng:
+    image: searxng/searxng:latest
+    container_name: globalregai-searxng
+    restart: unless-stopped
+    networks:
+      - globalregai
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/searxng:/etc/searxng

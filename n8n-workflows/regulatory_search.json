@@ -1,0 +1,96 @@
+{
+  "name": "GlobalRegAI — Regulatory Intelligence Search",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 24 }]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Regulatory Update (9AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.fda.gov/device/recall.json?limit=5&sort=report_date:desc",
+        "options": {}
+      },
+      "id": "fda-recalls",
+      "name": "FDA Device Recalls",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.fda.gov/drug/enforcement.json?limit=5&sort=report_date:desc",
+        "options": {}
+      },
+      "id": "fda-drug-enforcement",
+      "name": "FDA Drug Enforcement",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/generate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "model", "value": "llama3.2:3b" },
+            { "name": "prompt", "value": "=Summarize these regulatory updates in a clear, professional format for a regulatory affairs team. Focus on actionable insights.\n\nFDA Device Recalls: {{ JSON.stringify($('FDA Device Recalls').item.json.results?.slice(0,3)) }}\n\nFDA Drug Enforcement: {{ JSON.stringify($('FDA Drug Enforcement').item.json.results?.slice(0,3)) }}\n\nProvide: 1) Summary of each item, 2) Regulatory implications, 3) Action recommendations" },
+            { "name": "stream", "value": false }
+          ]
+        }
+      },
+      "id": "summarize-updates",
+      "name": "AI Summarize Updates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://qdrant:6333/collections/globalregai_regulations/points/search",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "limit", "value": 3 },
+            { "name": "with_payload", "value": true }
+          ]
+        }
+      },
+      "id": "store-to-qdrant",
+      "name": "Log to Vector DB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Daily Regulatory Update (9AM)": {
+      "main": [
+        [
+          { "node": "FDA Device Recalls", "type": "main", "index": 0 },
+          { "node": "FDA Drug Enforcement", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "FDA Device Recalls": {
+      "main": [[{ "node": "AI Summarize Updates", "type": "main", "index": 0 }]]
+    },
+    "AI Summarize Updates": {
+      "main": [[{ "node": "Log to Vector DB", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "description": "Runs daily: fetches FDA recalls/enforcement, summarizes with AI, logs to vector DB"
+  }
+}

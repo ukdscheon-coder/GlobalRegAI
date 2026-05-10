@@ -1,0 +1,88 @@
+{
+  "version": "1.1.0",
+  "supported_languages": [
+    {
+      "code": "ko",
+      "name": "한국어",
+      "name_native": "한국어",
+      "flag": "🇰🇷",
+      "primary_agencies": ["MFDS", "NIFDS"],
+      "regulatory_context": "Korea",
+      "terminology_file": "regulatory_terms_ko.md",
+      "response_style": "존댓말 사용, 한국 규정 용어 우선",
+      "agencies": {
+        "medical_device": "식품의약품안전처 (MFDS)",
+        "pharmaceutical": "식품의약품안전처 (MFDS)",
+        "cosmetics": "식품의약품안전처 (MFDS)",
+        "food": "식품의약품안전처 (MFDS) / 식품안전정보원"
+      }
+    },
+    {
+      "code": "en",
+      "name": "English",
+      "name_native": "English",
+      "flag": "🇺🇸🇬🇧",
+      "primary_agencies": ["FDA", "EMA", "TGA", "Health Canada"],
+      "regulatory_context": "US/EU/Global",
+      "terminology_file": "regulatory_terms_en.md",
+      "response_style": "Professional regulatory English, cite CFR/guidance numbers",
+      "agencies": {
+        "medical_device": "FDA CDRH / EMA",
+        "pharmaceutical": "FDA CDER / EMA",
+        "cosmetics": "FDA / EU Cosmetics Regulation",
+        "food": "FDA CFSAN / EFSA"
+      }
+    },
+    {
+      "code": "zh",
+      "name": "中文",
+      "name_native": "中文 (简体)",
+      "flag": "🇨🇳",
+      "primary_agencies": ["NMPA", "CFDA"],
+      "regulatory_context": "China",
+      "terminology_file": "regulatory_terms_zh.md",
+      "response_style": "使用中国药监局官方术语，引用相关法规编号",
+      "agencies": {
+        "medical_device": "国家药品监督管理局 (NMPA)",
+        "pharmaceutical": "国家药品监督管理局 (NMPA)",
+        "cosmetics": "国家药品监督管理局 (NMPA)",
+        "food": "国家市场监督管理总局 (SAMR)"
+      }
+    },
+    {
+      "code": "ja",
+      "name": "日本語",
+      "name_native": "日本語",
+      "flag": "🇯🇵",
+      "primary_agencies": ["PMDA", "MHLW"],
+      "regulatory_context": "Japan",
+      "terminology_file": "regulatory_terms_ja.md",
+      "response_style": "丁寧語を使用し、PMDAおよび厚生労働省の公式用語を引用",
+      "agencies": {
+        "medical_device": "独立行政法人 医薬品医療機器総合機構 (PMDA)",
+        "pharmaceutical": "厚生労働省 (MHLW) / PMDA",
+        "cosmetics": "厚生労働省 (MHLW)",
+        "food": "食品安全委員会 (FSCJ)"
+      }
+    },
+    {
+      "code": "es",
+      "name": "Español",
+      "name_native": "Español",
+      "flag": "🇪🇸🇲🇽🇦🇷🇨🇴🇨🇱",
+      "primary_agencies": ["AEMPS", "COFEPRIS", "ANMAT", "INVIMA", "ISP", "DIGEMID"],
+      "regulatory_context": "Spain/Latin America",
+      "terminology_file": "regulatory_terms_es.md",
+      "response_style": "Español formal, usar terminología oficial de AEMPS/COFEPRIS/ANMAT",
+      "agencies": {
+        "medical_device": "AEMPS (España) / COFEPRIS (México) / ANMAT (Argentina) / INVIMA (Colombia)",
+        "pharmaceutical": "AEMPS (España) / COFEPRIS (México) / ANMAT (Argentina)",
+        "cosmetics": "AEMPS (España) / COFEPRIS (México) / INVIMA (Colombia)",
+        "food": "AESAN (España) / COFEPRIS (México) / ANMAT (Argentina)"
+      }
+    }
+  ],
+  "default_language": "en",
+  "auto_detect": true,
+  "fallback_language": "en"
+}
