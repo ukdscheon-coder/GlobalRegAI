@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Database, Activity, LogOut, Globe, Sun, Moon, Search, Layers, ShieldAlert, FileText, Clock, Box, Bell, Users, FileCheck, Share2, Paperclip, QrCode } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
@@ -46,9 +47,9 @@ function App() {
   const sendMessage = async () => {
     if (!input.trim()) return;
     
-    // Freemium Paywall Logic (5 Free Uses for Chat Assistant)
+    // Freemium Paywall Logic (10 Free Uses for Chat Assistant)
     if (!session) {
-      if (activeModule !== 'Chat Assistant' || freeMessageCount >= 5) {
+      if (activeModule !== 'Chat Assistant' || freeMessageCount >= 10) {
         setShowAuthModal(true);
         return;
       }
@@ -345,7 +346,7 @@ NMN은 식약처 고시 '식품의 기준 및 규격(식품공전)'에 등재되
               </div>
               <div className="content">
                 {msg.role === 'assistant' ? (
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content.replace(/###/g, '\n\n###').replace(/\n- /g, '\n\n- ')}</ReactMarkdown>
                 ) : (
                   msg.content
                 )}
