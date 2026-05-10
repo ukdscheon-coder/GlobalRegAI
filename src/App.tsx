@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, Settings, Database, Activity, Map, LogOut } from 'lucide-react';
+import { Send, Settings, Database, Activity, Map, LogOut, Globe, Sun, Moon } from 'lucide-react';
 import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
@@ -9,6 +9,12 @@ function App() {
   const [isTyping, setIsTyping] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [theme, setTheme] = useState('light');
+  const [language, setLanguage] = useState('English');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -29,7 +35,8 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  const isAdmin = session?.user?.email === 'uk.dscheon@gmail.com';
+  const ADMIN_EMAILS = ['uk.dscheon@gmail.com', 'admin@globalregai.info'];
+  const isAdmin = session?.user?.email && ADMIN_EMAILS.includes(session.user.email);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -116,11 +123,25 @@ function App() {
       <main className="chat-area">
         <header className="chat-header">
           <h2>Regulatory Assistant {isAdmin && <span style={{color: '#f59e0b', fontSize: '0.875rem', marginLeft: '0.5rem'}}>[ADMIN]</span>}</h2>
-          <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
+          <div style={{display: 'flex', gap: '0.75rem', alignItems: 'center'}}>
+            {/* Language Selector */}
+            <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', border: '1px solid var(--border-color)', borderRadius: '0.5rem', backgroundColor: 'var(--bg-color)'}}>
+              <Globe size={16} color="var(--text-secondary)" />
+              <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontSize: '0.875rem'}}>
+                <option>English</option>
+                <option>한국어</option>
+                <option>日本語</option>
+                <option>中文</option>
+              </select>
+            </div>
+            {/* Theme Toggle */}
+            <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} style={{background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '0.5rem', padding: '0.4rem', cursor: 'pointer', display: 'flex'}}>
+              {theme === 'light' ? <Moon size={16} color="var(--text-secondary)" /> : <Sun size={16} color="var(--text-secondary)" />}
+            </button>
             {isAdmin ? (
               <span className="badge" style={{backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.2)'}}>Free Access (Admin)</span>
             ) : (
-              <span className="badge">Professional Plan</span>
+              <span className="badge" style={{backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)'}}>Community (Free)</span>
             )}
           </div>
         </header>

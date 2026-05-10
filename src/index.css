@@ -1,4 +1,16 @@
 :root {
+  --bg-color: #f3f4f6;
+  --sidebar-bg: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --accent-color: #2563eb;
+  --accent-hover: #1d4ed8;
+  --border-color: #e5e7eb;
+  --msg-user: #2563eb;
+  --msg-ai: #ffffff;
+}
+
+[data-theme="dark"] {
   --bg-color: #0f172a;
   --sidebar-bg: #1e293b;
   --text-primary: #f8fafc;
@@ -126,8 +138,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
+  background: var(--sidebar-bg);
   z-index: 10;
 }
 
@@ -178,11 +189,13 @@ body {
 }
 
 .message.user .avatar {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  color: white;
 }
 
 .message.assistant .avatar {
   background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: white;
 }
 
 .content {
@@ -199,7 +212,7 @@ body {
 }
 
 .message.assistant .content {
-  background-color: var(--sidebar-bg);
+  background-color: var(--msg-ai);
   border: 1px solid var(--border-color);
   border-bottom-left-radius: 0.25rem;
 }
