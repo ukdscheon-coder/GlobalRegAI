@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Database, Activity, LogOut, Globe, Sun, Moon, Search, Layers, ShieldAlert, FileText, Clock, Box, Bell, Users, FileCheck, Share2, Paperclip, QrCode } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
@@ -342,7 +343,13 @@ NMN은 식약처 고시 '식품의 기준 및 규격(식품공전)'에 등재되
               <div className="avatar">
                 {msg.role === 'assistant' ? 'AI' : 'U'}
               </div>
-              <div className="content">{msg.content}</div>
+              <div className="content">
+                {msg.role === 'assistant' ? (
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                ) : (
+                  msg.content
+                )}
+              </div>
             </div>
           ))}
           {isTyping && (

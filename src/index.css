@@ -269,10 +269,68 @@ body {
   border-bottom-right-radius: 0.25rem;
 }
 
-.message.assistant .content {
-  background-color: var(--msg-ai);
-  border: 1px solid var(--border-color);
-  border-bottom-left-radius: 0.25rem;
+.message.assistant {
+  align-self: flex-start;
+  background-color: var(--message-ai-bg);
+  color: var(--message-ai-text);
+  border-top-left-radius: 0;
+}
+
+.message.assistant .content p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.message.assistant .content p:last-child {
+  margin-bottom: 0;
+}
+
+.message.assistant .content h1,
+.message.assistant .content h2,
+.message.assistant .content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.message.assistant .content ul,
+.message.assistant .content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.message.assistant .content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.message.assistant .content a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.message.assistant .content a:hover {
+  text-decoration: underline;
+}
+
+.message.assistant .content blockquote {
+  border-left: 4px solid var(--accent-color);
+  padding-left: 1rem;
+  margin-top: 1.5rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  background: rgba(37, 99, 235, 0.05);
+  padding: 0.75rem 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.message.user {
+  align-self: flex-end;
+  background-color: var(--accent-color);
+  color: white;
+  border-top-right-radius: 0;
 }
 
 .input-area {
